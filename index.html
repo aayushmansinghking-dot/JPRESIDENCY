@@ -1,253 +1,329 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>JP Residency Guest Registration and Booking Form</title>
+  <meta charset="utf-8" />
+  <title>JP Residency - Firebase Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Using compat libs for simpler code (works when pasted into index.html) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #2c3e50, #4ca1af);
-      color: white;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    h1 {
-      background: rgba(0,0,0,0.6);
-      padding: 15px;
-      margin: 0;
-      font-size: 22px;
-      font-weight: bold;
-    }
-    .section {
-      display: none;
-      padding: 20px;
-    }
-    .active {
-      display: block;
-    }
-    input, select, textarea, button {
-      padding: 8px;
-      margin: 6px;
-      border-radius: 6px;
-      border: none;
-    }
-    button {
-      cursor: pointer;
-      background: #27ae60;
-      color: white;
-      font-weight: bold;
-    }
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      background: white;
-      color: black;
-    }
-    table, th, td {
-      border: 1px solid black;
-      padding: 8px 12px;
-    }
+    body{ font-family: Arial; background:linear-gradient(135deg,#0f172a,#0ea5a3); color:#fff; margin:0; padding:20px; }
+    .card{ background: rgba(255,255,255,0.06); padding:18px; border-radius:10px; max-width:900px; margin:12px auto; }
+    input,select,button{ width:100%; padding:8px; margin:8px 0; border-radius:6px; border: none; }
+    button{ background:#06b6d4; color:#042f2e; font-weight:700; cursor:pointer; }
+    table{ width:100%; border-collapse:collapse; margin-top:12px; color:#000; }
+    th,td{ border:1px solid #ddd; padding:8px; text-align:center; background:#fff; }
+    th{ background:#06b6d4; color:#fff; }
+    .small{ font-size:13px; color:#e6e6e6; margin-top:6px; }
   </style>
 </head>
 <body>
-  <h1>JP RESIDENCY GUEST REGISTRATION AND BOOKING FORM</h1>
 
-  <!-- First Page -->
-  <div id="home" class="section active">
-    <button onclick="showSection('registration')">New Registration</button>
-    <button onclick="showSection('login')">Already Registered</button>
+  <h1 style="text-align:center">JP RESIDENCY — Cloud (Firebase) Demo</h1>
+
+  <!-- HOME -->
+  <div id="home" class="card">
+    <button onclick="show('register')">New Registration</button>
+    <button onclick="show('login')">Already Registered / Owner</button>
+    <p class="small">Note: Owner password = <b>AMS</b></p>
   </div>
 
-  <!-- Registration Form -->
-  <div id="registration" class="section">
+  <!-- REGISTER -->
+  <div id="register" class="card" style="display:none;">
     <h2>New Registration</h2>
-    <form id="regForm">
-      <fieldset>
-        <legend>Personal Information</legend>
-        <input type="text" name="fullname" placeholder="Full Name" required><br>
-        <select name="gender" required>
-          <option value="">Select Gender</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
-        </select><br>
-        <input type="text" name="phone" placeholder="Phone Number"><br>
-        <input type="email" name="email" placeholder="Email ID"><br>
-        <textarea name="address" placeholder="Address"></textarea><br>
-        <select name="idtype">
-          <option>Aadhar Card</option>
-          <option>PAN Card</option>
-          <option>Passport</option>
-          <option>Driving Licence</option>
-        </select><br>
-        <input type="text" name="idnumber" placeholder="ID Number"><br>
-        Upload Aadhar: <input type="file" name="aadhar"><br>
-        Upload Signature: <input type="file" name="sign"><br>
-      </fieldset>
-      <fieldset>
-        <legend>Room Details</legend>
-        <input type="date" name="dateofliving"><br>
-        Guests: 
-        <select name="guests">
-          <option>1</option><option>2</option><option>3</option><option>4</option>
-        </select><br>
-      </fieldset>
-      <fieldset>
-        <legend>Payment Details</legend>
-        <input type="text" name="rent" placeholder="Room Rent Per Month"><br>
-        <input type="text" name="advance" placeholder="Advance Paid"><br>
-        <input type="text" name="electric" placeholder="Previous Electric Meter Reading"><br>
-      </fieldset>
-      <button type="button" onclick="submitDetails()">Submit Details</button>
-    </form>
+    <input id="r_name" placeholder="Full Name" />
+    <input id="r_phone" placeholder="Phone (any text allowed)" />
+    <input id="r_email" placeholder="Email (any text allowed)" />
+    <select id="r_idtype">
+      <option>Aadhar Card</option><option>PAN Card</option><option>Passport</option><option>Driving Licence</option>
+    </select>
+    <input id="r_idnumber" placeholder="ID Number (any)" />
+    <input id="r_date" type="date" />
+    <select id="r_guests"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+    <input id="r_rent" placeholder="Room Rent per month" />
+    <input id="r_advance" placeholder="Advance Paid" />
+    <input id="r_meter" placeholder="Prev Electric Meter Reading" />
+    <label style="color:#ddd">Upload Aadhaar Image (optional)</label>
+    <input id="r_aad" type="file" accept="image/*" />
+    <label style="color:#ddd">Upload Signature Image (optional)</label>
+    <input id="r_sign" type="file" accept="image/*" />
+    <input id="r_pass" placeholder="Create password (store for login)" />
+    <button onclick="onRegister()">Submit Registration</button>
+    <button onclick="show('home')" style="background:#94a3b8">Cancel</button>
+    <p id="regStatus" class="small"></p>
   </div>
 
-  <!-- Registration Success -->
-  <div id="success" class="section"></div>
-
-  <!-- Login Page -->
-  <div id="login" class="section">
-    <h2>Already Registered</h2>
-    <input type="text" id="loginReg" placeholder="Registration Number"><br>
-    <input type="password" id="loginPass" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
+  <!-- AFTER REGISTER: shows reg no + send to owner -->
+  <div id="after" class="card" style="display:none;">
+    <h2 id="afterWelcome"></h2>
+    <p id="afterRegNo"></p>
+    <button onclick="sendDetailsToOwner()">Send Details to Owner (WhatsApp)</button>
+    <button onclick="show('home')" style="background:#94a3b8">Back to Home</button>
   </div>
 
-  <!-- Details Page -->
-  <div id="details" class="section"></div>
+  <!-- LOGIN -->
+  <div id="login" class="card" style="display:none;">
+    <h2>Login (User or Owner)</h2>
+    <input id="l_reg" placeholder="Registration Number (e.g. 1234)" />
+    <input id="l_pass" placeholder="Password" />
+    <button onclick="onLogin()">Login</button>
+    <button onclick="show('home')" style="background:#94a3b8">Back</button>
+    <p class="small">Owner uses password <b>AMS</b> and can view/edit all registrations.</p>
+    <p id="loginMsg" class="small"></p>
+  </div>
+
+  <!-- USER DASHBOARD -->
+  <div id="userView" class="card" style="display:none;">
+    <h2>Welcome <span id="u_name"></span></h2>
+    <div id="u_details"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="sendDetailsToOwnerFromView()">Send My Details to Owner (WhatsApp)</button>
+      <button onclick="logout()" style="background:#94a3b8">Logout</button>
+    </div>
+  </div>
+
+  <!-- OWNER DASHBOARD -->
+  <div id="ownerView" class="card" style="display:none;">
+    <h2>Owner Dashboard (AMS)</h2>
+    <div style="overflow:auto">
+      <table id="ownerTable">
+        <thead><tr><th>RegNo</th><th>Name</th><th>Phone</th><th>Email</th><th>Aadhaar</th><th>Rent</th><th>Advance</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="ownerSaveChanges()">Update Changes (save to Firebase)</button>
+      <button onclick="ownerSendAll()">Send All to Owner Number (WhatsApp)</button>
+      <button onclick="logout()" style="background:#94a3b8">Logout</button>
+    </div>
+    <p class="small">Tip: Click into table cells to edit values, then click <b>Update Changes</b>.</p>
+  </div>
 
 <script>
-  let registrations = {};
-  let currentUser = null;
+/* ------------------ FIREBASE CONFIG & INIT ------------------ */
+/* Replace this config with your project's if different */
+const firebaseConfig = {
+  apiKey: "AIzaSyDyty-R7Ne4H2hS-CMYUx0xmlm9oLI7koY",
+  authDomain: "jp-residency-70cbf.firebaseapp.com",
+  databaseURL: "https://jp-residency-70cbf-default-rtdb.firebaseio.com/",
+  projectId: "jp-residency-70cbf",
+  storageBucket: "jp-residency-70cbf.appspot.com",
+  messagingSenderId: "1084521996397",
+  appId: "1:1084521996397:web:c84888677e1009e9049f64"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const storage = firebase.storage();
 
-  function showSection(id) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+/* ------------------ HELPERS ------------------ */
+function show(id){
+  ['home','register','after','login','userView','ownerView'].forEach(k=>document.getElementById(k).style.display='none');
+  document.getElementById(id).style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function toText(obj){
+  return Object.keys(obj||{}).map(k => `${k.toUpperCase()}: ${obj[k]}`).join('\n');
+}
+
+/* ------------------ UNIQUE 4-DIGIT REG GENERATOR ------------------ */
+async function genUnique4Digit(){
+  let reg;
+  while(true){
+    reg = String(Math.floor(1000 + Math.random()*9000));
+    const snap = await db.ref('users/' + reg).once('value');
+    if(!snap.exists()) return reg;
   }
+}
 
-  function submitDetails() {
-    const form = document.getElementById("regForm");
-    const data = Object.fromEntries(new FormData(form).entries());
-    const regNo = Math.floor(1000 + Math.random() * 9000);
-    data.regNo = regNo;
-    data.userPassword = prompt("Create a 4-digit password:");
-    registrations[regNo] = data;
+/* ------------------ REGISTER ------------------ */
+async function onRegister(){
+  document.getElementById('regStatus').innerText = 'Submitting...';
+  try{
+    const name = document.getElementById('r_name').value.trim();
+    if(!name) { alert('Enter name'); return; }
+    const payload = {
+      name,
+      phone: document.getElementById('r_phone').value || '',
+      email: document.getElementById('r_email').value || '',
+      idType: document.getElementById('r_idtype').value,
+      idNumber: document.getElementById('r_idnumber').value || '',
+      dateOfLiving: document.getElementById('r_date').value || '',
+      guests: document.getElementById('r_guests').value || '1',
+      rent: document.getElementById('r_rent').value || '',
+      advance: document.getElementById('r_advance').value || '',
+      meter: document.getElementById('r_meter').value || '',
+      password: document.getElementById('r_pass').value || ''
+    };
 
-    document.getElementById("success").innerHTML = `
-      <h2><b>WELCOME MR. ${data.fullname.toUpperCase()} TO JP RESIDENCY</b></h2>
-      <p><b>YOUR REGISTRATION NUMBER IS ${regNo}</b></p>
-      <p><button onclick="sendDetails('${regNo}')">Send Details to Owner</button></p>
+    // unique reg
+    const regNo = await genUnique4Digit();
+
+    // upload images if provided
+    const aadFile = document.getElementById('r_aad').files[0];
+    const signFile = document.getElementById('r_sign').files[0];
+    if(aadFile){
+      const aadRef = storage.ref('aadhaar/' + regNo + '_' + Date.now() + '_' + aadFile.name);
+      const snap = await aadRef.put(aadFile);
+      payload.aadhaarUrl = await snap.ref.getDownloadURL();
+    }
+    if(signFile){
+      const signRef = storage.ref('signature/' + regNo + '_' + Date.now() + '_' + signFile.name);
+      const snap2 = await signRef.put(signFile);
+      payload.signUrl = await snap2.ref.getDownloadURL();
+    }
+
+    // initialize payments (Jan-Dec current year)
+    const year = new Date().getFullYear();
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    payload.payments = {};
+    months.forEach(m => payload.payments[m + ' ' + year] = { rent: payload.rent || '', status: 'Not Done' });
+
+    // save to Realtime DB
+    await db.ref('users/' + regNo).set({ regNo, ...payload });
+
+    // show after screen
+    document.getElementById('regStatus').innerText = '';
+    document.getElementById('afterWelcome').innerText = `WELCOME MR. ${name.toUpperCase()} TO JP RESIDENCY`;
+    document.getElementById('afterRegNo').innerText = `YOUR REGISTRATION NUMBER IS ${regNo}`;
+    // store last regNo (for send function)
+    window._lastReg = regNo;
+    show('after');
+  } catch(err){
+    console.error(err);
+    alert('Error: ' + err.message);
+    document.getElementById('regStatus').innerText = '';
+  }
+}
+
+/* ------------------ SEND DETAILS TO OWNER (WhatsApp) ------------------ */
+function sendDetailsToOwner(){
+  const reg = window._lastReg;
+  if(!reg){ alert('No registration found'); return; }
+  db.ref('users/' + reg).once('value').then(snap=>{
+    const r = snap.val();
+    if(!r) return alert('Record missing');
+    const msg = `JP Residency New Guest\nRegNo: ${reg}\nName: ${r.name}\nPhone: ${r.phone}\nEmail: ${r.email}\nID: ${r.idType} ${r.idNumber}\nRent: ${r.rent}\nAdvance: ${r.advance}`;
+    const wa = 'https://wa.me/919942823314?text=' + encodeURIComponent(msg);
+    window.open(wa,'_blank');
+  });
+}
+
+/* ------------------ LOGIN ------------------ */
+async function onLogin(){
+  const reg = document.getElementById('l_reg').value.trim();
+  const pass = document.getElementById('l_pass').value;
+  if(!reg){ alert('Enter registration number'); return; }
+  // owner login
+  if(pass === 'AMS'){
+    // show owner panel
+    await loadOwnerTable();
+    show('ownerView');
+    return;
+  }
+  // normal user
+  const snap = await db.ref('users/' + reg).once('value');
+  if(!snap.exists()){ alert('Registration not found'); return; }
+  const data = snap.val();
+  if(data.password !== pass){ alert('Incorrect password'); return; }
+  // show user details
+  document.getElementById('u_name').innerText = data.name;
+  document.getElementById('u_details').innerText = toText({
+    'RegNo': data.regNo,
+    'Name': data.name,
+    'Phone': data.phone,
+    'Email': data.email,
+    'ID': data.idType + ' ' + data.idNumber,
+    'Room Rent': data.rent,
+    'Advance': data.advance
+  });
+  // show aadhar / sign images if present
+  if(data.aadhaarUrl || data.signUrl){
+    let imgs = '';
+    if(data.aadhaarUrl) imgs += `<div style="margin-top:12px"><b>Aadhaar Image</b><br><img src="${data.aadhaarUrl}" style="max-width:220px"></div>`;
+    if(data.signUrl) imgs += `<div style="margin-top:12px"><b>Signature</b><br><img src="${data.signUrl}" style="max-width:220px"></div>`;
+    document.getElementById('u_details').innerHTML += imgs;
+  }
+  show('userView');
+}
+
+/* ------------------ OWNER: LIST ALL USERS INTO TABLE ------------------ */
+async function loadOwnerTable(){
+  const tbody = document.querySelector('#ownerTable tbody');
+  tbody.innerHTML = '<tr><td colspan="8">Loading...</td></tr>';
+  const snap = await db.ref('users').once('value');
+  tbody.innerHTML = '';
+  if(!snap.exists()){ tbody.innerHTML = '<tr><td colspan="8">No records</td></tr>'; return; }
+  snap.forEach(child => {
+    const u = child.val();
+    const reg = child.key;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${reg}</td>
+      <td contenteditable="true">${u.name || ''}</td>
+      <td contenteditable="true">${u.phone || ''}</td>
+      <td contenteditable="true">${u.email || ''}</td>
+      <td contenteditable="true">${u.idNumber || ''}</td>
+      <td contenteditable="true">${u.rent || ''}</td>
+      <td contenteditable="true">${u.advance || ''}</td>
+      <td><button onclick="ownerDelete('${reg}')">Delete</button></td>
     `;
-    showSection("success");
+    tbody.appendChild(tr);
+  });
+}
+
+/* ------------------ OWNER: SAVE CHANGES ------------------ */
+async function ownerSaveChanges(){
+  const rows = Array.from(document.querySelectorAll('#ownerTable tbody tr'));
+  const updates = {};
+  rows.forEach(row=>{
+    const reg = row.cells[0].innerText;
+    updates[reg] = {
+      name: row.cells[1].innerText,
+      phone: row.cells[2].innerText,
+      email: row.cells[3].innerText,
+      idNumber: row.cells[4].innerText,
+      rent: row.cells[5].innerText,
+      advance: row.cells[6].innerText
+    };
+  });
+  // write each entry
+  for(const reg in updates){
+    const u = updates[reg];
+    await db.ref('users/' + reg).update(u);
   }
+  alert('Updates saved to Firebase.');
+  await loadOwnerTable();
+}
 
-  function sendDetails(regNo) {
-    let msg = `JP RESIDENCY NEW GUEST DETAILS%0ARegistration No: ${regNo}`;
-    window.open(`https://wa.me/919942823314?text=${msg}`, "_blank");
-  }
+/* ------------------ OWNER: DELETE ------------------ */
+async function ownerDelete(reg){
+  if(!confirm('Delete ' + reg + '?')) return;
+  await db.ref('users/' + reg).remove();
+  alert('Deleted ' + reg);
+  await loadOwnerTable();
+}
 
-  function login() {
-    const reg = document.getElementById("loginReg").value;
-    const pass = document.getElementById("loginPass").value;
-    const data = registrations[reg];
+/* ------------------ OWNER: send all to owner (WhatsApp) ------------------ */
+async function ownerSendAll(){
+  const snap = await db.ref('users').once('value');
+  if(!snap.exists()){ alert('No records'); return; }
+  let msg = 'JP Residency - All Guests\\n\\n';
+  snap.forEach(child=>{
+    const u = child.val();
+    msg += `Reg:${child.key} Name:${u.name} Phone:${u.phone} Rent:${u.rent} Advance:${u.advance}\\n`;
+  });
+  const wa = 'https://wa.me/919942823314?text=' + encodeURIComponent(msg);
+  window.open(wa,'_blank');
+}
 
-    if (!data) {
-      alert("Registration not found!");
-      return;
-    }
+/* ------------------ UTILS ------------------ */
+function logout(){ show('home'); document.getElementById('loginMsg').innerText=''; }
 
-    if (pass === data.userPassword) {
-      // User Login
-      let html = `<h2>Welcome ${data.fullname.toUpperCase()}</h2>
-      <p><b>All Your Details</b></p>
-      Name: ${data.fullname}<br>
-      Phone: ${data.phone}<br>
-      Email: ${data.email}<br>
-      ID: ${data.idtype} - ${data.idnumber}<br>
-      Guests: ${data.guests}<br>
-      Rent: ${data.rent}<br>
-      Advance: ${data.advance}<br>
-      <p><b>Payment Table</b></p>
-      <table><tr><th>Month</th><th>Rent</th><th>Status</th></tr>`;
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      months.forEach(m => {
-        html += `<tr><td>${m} 2025</td><td>${data.rent}</td><td>Not Done</td></tr>`;
-      });
-      html += `</table>`;
-      document.getElementById("details").innerHTML = html;
-      showSection("details");
-    } else if (pass === "AMS") {
-      // Owner Login
-      let html = `<h2>OWNER ACCESS</h2>
-      <p>Editing Payments for ${data.fullname.toUpperCase()}</p>
-      <table id="payTable"><tr><th>Month</th><th>Rent</th><th>Status</th></tr>`;
-      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      months.forEach(m => {
-        html += `<tr><td>${m} 2025</td><td>${data.rent}</td>
-          <td><select><option>Done</option><option>Not Done</option></select></td></tr>`;
-      });
-      html += `</table><button onclick="updateChanges('${reg}')">Update Changes</button>`;
-      document.getElementById("details").innerHTML = html;
-      showSection("details");
-    } else {
-      alert("Wrong password!");
-    }
-  }
-
-  function updateChanges(reg) {
-    alert("Changes Updated! Visible to User Now.");
-    showSection("home");
-  }
-</script>
-  <!-- Firebase Integration -->
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDyty-R7Ne4H2hS-CMYUx0xmlm9oLI7koY",
-    authDomain: "jp-residency-70cbf.firebaseapp.com",
-    projectId: "jp-residency-70cbf",
-    storageBucket: "jp-residency-70cbf.appspot.com",
-    messagingSenderId: "1084521996397",
-    appId: "1:1084521996397:web:c84888677e1009e9049f64",
-    measurementId: "G-Z7VCTVRQ8Z",
-    databaseURL: "https://jp-residency-70cbf-default-rtdb.firebaseio.com/"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Example function: Save user details
-  window.saveUser = function (regNumber, details) {
-    set(ref(db, "users/" + regNumber), details)
-      .then(() => {
-        alert("Details saved successfully!");
-      })
-      .catch((error) => {
-        console.error("Error saving data:", error);
-      });
-  };
-
-  // Example function: Get user details
-  window.getUser = async function (regNumber) {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, "users/" + regNumber));
-      if (snapshot.exists()) {
-        return snapshot.val();
-      } else {
-        alert("No data found!");
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+// show home initially
+show('home');
 </script>
 </body>
-
 </html>
