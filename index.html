@@ -200,5 +200,54 @@
     showSection("home");
   }
 </script>
+  <!-- Firebase Integration -->
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDyty-R7Ne4H2hS-CMYUx0xmlm9oLI7koY",
+    authDomain: "jp-residency-70cbf.firebaseapp.com",
+    projectId: "jp-residency-70cbf",
+    storageBucket: "jp-residency-70cbf.appspot.com",
+    messagingSenderId: "1084521996397",
+    appId: "1:1084521996397:web:c84888677e1009e9049f64",
+    measurementId: "G-Z7VCTVRQ8Z",
+    databaseURL: "https://jp-residency-70cbf-default-rtdb.firebaseio.com/"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Example function: Save user details
+  window.saveUser = function (regNumber, details) {
+    set(ref(db, "users/" + regNumber), details)
+      .then(() => {
+        alert("Details saved successfully!");
+      })
+      .catch((error) => {
+        console.error("Error saving data:", error);
+      });
+  };
+
+  // Example function: Get user details
+  window.getUser = async function (regNumber) {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, "users/" + regNumber));
+      if (snapshot.exists()) {
+        return snapshot.val();
+      } else {
+        alert("No data found!");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+</script>
 </body>
+
 </html>
