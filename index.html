@@ -1,329 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>JP Residency - Firebase Demo</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <!-- Using compat libs for simpler code (works when pasted into index.html) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<meta charset="UTF-8">
+<title>ACCESS TERMINAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body{ font-family: Arial; background:linear-gradient(135deg,#0f172a,#0ea5a3); color:#fff; margin:0; padding:20px; }
-    .card{ background: rgba(255,255,255,0.06); padding:18px; border-radius:10px; max-width:900px; margin:12px auto; }
-    input,select,button{ width:100%; padding:8px; margin:8px 0; border-radius:6px; border: none; }
-    button{ background:#06b6d4; color:#042f2e; font-weight:700; cursor:pointer; }
-    table{ width:100%; border-collapse:collapse; margin-top:12px; color:#000; }
-    th,td{ border:1px solid #ddd; padding:8px; text-align:center; background:#fff; }
-    th{ background:#06b6d4; color:#fff; }
-    .small{ font-size:13px; color:#e6e6e6; margin-top:6px; }
-  </style>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: "Courier New", monospace;
+}
+body{
+    background:black;
+    color:#00ff00;
+    overflow:hidden;
+}
+.screen{
+    display:none;
+    width:100vw;
+    height:100vh;
+    padding:20px;
+}
+.active{
+    display:block;
+}
+.center{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    height:100%;
+}
+h1{
+    text-shadow:0 0 10px #00ff00;
+}
+input{
+    background:black;
+    border:1px solid #00ff00;
+    color:#00ff00;
+    padding:10px;
+    font-size:18px;
+    width:80%;
+    margin-top:20px;
+    outline:none;
+}
+.scan-box{
+    width:300px;
+    height:300px;
+    border:2px solid #00ff00;
+    position:relative;
+    margin-top:30px;
+}
+.scan-line{
+    position:absolute;
+    width:100%;
+    height:4px;
+    background:#00ff00;
+    animation:scan 2s linear infinite;
+}
+@keyframes scan{
+    0%{top:0}
+    100%{top:100%}
+}
+.loading{
+    margin-top:20px;
+    animation:blink 1s infinite;
+}
+@keyframes blink{
+    50%{opacity:0}
+}
+.matrix{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+</style>
 </head>
+
 <body>
 
-  <h1 style="text-align:center">JP RESIDENCY — Cloud (Firebase) Demo</h1>
+<canvas class="matrix"></canvas>
 
-  <!-- HOME -->
-  <div id="home" class="card">
-    <button onclick="show('register')">New Registration</button>
-    <button onclick="show('login')">Already Registered / Owner</button>
-    <p class="small">Note: Owner password = <b>AMS</b></p>
-  </div>
-
-  <!-- REGISTER -->
-  <div id="register" class="card" style="display:none;">
-    <h2>New Registration</h2>
-    <input id="r_name" placeholder="Full Name" />
-    <input id="r_phone" placeholder="Phone (any text allowed)" />
-    <input id="r_email" placeholder="Email (any text allowed)" />
-    <select id="r_idtype">
-      <option>Aadhar Card</option><option>PAN Card</option><option>Passport</option><option>Driving Licence</option>
-    </select>
-    <input id="r_idnumber" placeholder="ID Number (any)" />
-    <input id="r_date" type="date" />
-    <select id="r_guests"><option>1</option><option>2</option><option>3</option><option>4</option></select>
-    <input id="r_rent" placeholder="Room Rent per month" />
-    <input id="r_advance" placeholder="Advance Paid" />
-    <input id="r_meter" placeholder="Prev Electric Meter Reading" />
-    <label style="color:#ddd">Upload Aadhaar Image (optional)</label>
-    <input id="r_aad" type="file" accept="image/*" />
-    <label style="color:#ddd">Upload Signature Image (optional)</label>
-    <input id="r_sign" type="file" accept="image/*" />
-    <input id="r_pass" placeholder="Create password (store for login)" />
-    <button onclick="onRegister()">Submit Registration</button>
-    <button onclick="show('home')" style="background:#94a3b8">Cancel</button>
-    <p id="regStatus" class="small"></p>
-  </div>
-
-  <!-- AFTER REGISTER: shows reg no + send to owner -->
-  <div id="after" class="card" style="display:none;">
-    <h2 id="afterWelcome"></h2>
-    <p id="afterRegNo"></p>
-    <button onclick="sendDetailsToOwner()">Send Details to Owner (WhatsApp)</button>
-    <button onclick="show('home')" style="background:#94a3b8">Back to Home</button>
-  </div>
-
-  <!-- LOGIN -->
-  <div id="login" class="card" style="display:none;">
-    <h2>Login (User or Owner)</h2>
-    <input id="l_reg" placeholder="Registration Number (e.g. 1234)" />
-    <input id="l_pass" placeholder="Password" />
-    <button onclick="onLogin()">Login</button>
-    <button onclick="show('home')" style="background:#94a3b8">Back</button>
-    <p class="small">Owner uses password <b>AMS</b> and can view/edit all registrations.</p>
-    <p id="loginMsg" class="small"></p>
-  </div>
-
-  <!-- USER DASHBOARD -->
-  <div id="userView" class="card" style="display:none;">
-    <h2>Welcome <span id="u_name"></span></h2>
-    <div id="u_details"></div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button onclick="sendDetailsToOwnerFromView()">Send My Details to Owner (WhatsApp)</button>
-      <button onclick="logout()" style="background:#94a3b8">Logout</button>
+<!-- SCREEN 1 -->
+<div class="screen active" id="s1">
+    <div class="center">
+        <h1>INITIALIZE ACCESS TERMINAL</h1>
+        <p>ENTER YOUR NAME</p>
+        <input id="username" placeholder="TYPE HERE...">
+        <p class="loading">PRESS ENTER TO CONTINUE</p>
     </div>
-  </div>
+</div>
 
-  <!-- OWNER DASHBOARD -->
-  <div id="ownerView" class="card" style="display:none;">
-    <h2>Owner Dashboard (AMS)</h2>
-    <div style="overflow:auto">
-      <table id="ownerTable">
-        <thead><tr><th>RegNo</th><th>Name</th><th>Phone</th><th>Email</th><th>Aadhaar</th><th>Rent</th><th>Advance</th><th>Actions</th></tr></thead>
-        <tbody></tbody>
-      </table>
+<!-- SCREEN 2 -->
+<div class="screen" id="s2">
+    <div class="center">
+        <h1>IDENTITY LOADING...</h1>
+        <p class="loading">VERIFYING USER PROFILE...</p>
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button onclick="ownerSaveChanges()">Update Changes (save to Firebase)</button>
-      <button onclick="ownerSendAll()">Send All to Owner Number (WhatsApp)</button>
-      <button onclick="logout()" style="background:#94a3b8">Logout</button>
+</div>
+
+<!-- SCREEN 3 -->
+<div class="screen" id="s3">
+    <div class="center">
+        <h1>ACE SYSTEM SCAN</h1>
+        <div class="scan-box">
+            <div class="scan-line"></div>
+        </div>
+        <p class="loading">SCANNING DATA...</p>
     </div>
-    <p class="small">Tip: Click into table cells to edit values, then click <b>Update Changes</b>.</p>
-  </div>
+</div>
+
+<!-- SCREEN 4 -->
+<div class="screen" id="s4">
+    <div class="center">
+        <h1>FINGERPRINT AUTHENTICATION</h1>
+        <div class="scan-box">
+            <div class="scan-line"></div>
+        </div>
+        <p class="loading">MATCHING BIOMETRICS...</p>
+    </div>
+</div>
+
+<!-- SCREEN 5 -->
+<div class="screen" id="s5">
+    <div class="center">
+        <h1>RETINA SCAN</h1>
+        <div class="scan-box">
+            <div class="scan-line"></div>
+        </div>
+        <p class="loading">EYE PATTERN VERIFIED...</p>
+    </div>
+</div>
+
+<!-- SCREEN 6 -->
+<div class="screen" id="s6">
+    <div class="center">
+        <h1>DECRYPTING SYSTEM FILES</h1>
+        <p class="loading">010101101010110010...</p>
+    </div>
+</div>
+
+<!-- SCREEN 7 -->
+<div class="screen" id="s7">
+    <div class="center">
+        <h1>ACCESS GRANTED</h1>
+        <p>WELCOME AGENT</p>
+        <h2 id="finalName"></h2>
+        <p class="loading">SYSTEM ONLINE</p>
+    </div>
+</div>
 
 <script>
-/* ------------------ FIREBASE CONFIG & INIT ------------------ */
-/* Replace this config with your project's if different */
-const firebaseConfig = {
-  apiKey: "AIzaSyDyty-R7Ne4H2hS-CMYUx0xmlm9oLI7koY",
-  authDomain: "jp-residency-70cbf.firebaseapp.com",
-  databaseURL: "https://jp-residency-70cbf-default-rtdb.firebaseio.com/",
-  projectId: "jp-residency-70cbf",
-  storageBucket: "jp-residency-70cbf.appspot.com",
-  messagingSenderId: "1084521996397",
-  appId: "1:1084521996397:web:c84888677e1009e9049f64"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const storage = firebase.storage();
+let current = 1;
+const total = 7;
 
-/* ------------------ HELPERS ------------------ */
-function show(id){
-  ['home','register','after','login','userView','ownerView'].forEach(k=>document.getElementById(k).style.display='none');
-  document.getElementById(id).style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function toText(obj){
-  return Object.keys(obj||{}).map(k => `${k.toUpperCase()}: ${obj[k]}`).join('\n');
-}
-
-/* ------------------ UNIQUE 4-DIGIT REG GENERATOR ------------------ */
-async function genUnique4Digit(){
-  let reg;
-  while(true){
-    reg = String(Math.floor(1000 + Math.random()*9000));
-    const snap = await db.ref('users/' + reg).once('value');
-    if(!snap.exists()) return reg;
-  }
-}
-
-/* ------------------ REGISTER ------------------ */
-async function onRegister(){
-  document.getElementById('regStatus').innerText = 'Submitting...';
-  try{
-    const name = document.getElementById('r_name').value.trim();
-    if(!name) { alert('Enter name'); return; }
-    const payload = {
-      name,
-      phone: document.getElementById('r_phone').value || '',
-      email: document.getElementById('r_email').value || '',
-      idType: document.getElementById('r_idtype').value,
-      idNumber: document.getElementById('r_idnumber').value || '',
-      dateOfLiving: document.getElementById('r_date').value || '',
-      guests: document.getElementById('r_guests').value || '1',
-      rent: document.getElementById('r_rent').value || '',
-      advance: document.getElementById('r_advance').value || '',
-      meter: document.getElementById('r_meter').value || '',
-      password: document.getElementById('r_pass').value || ''
-    };
-
-    // unique reg
-    const regNo = await genUnique4Digit();
-
-    // upload images if provided
-    const aadFile = document.getElementById('r_aad').files[0];
-    const signFile = document.getElementById('r_sign').files[0];
-    if(aadFile){
-      const aadRef = storage.ref('aadhaar/' + regNo + '_' + Date.now() + '_' + aadFile.name);
-      const snap = await aadRef.put(aadFile);
-      payload.aadhaarUrl = await snap.ref.getDownloadURL();
+document.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){
+        document.getElementById("s"+current).classList.remove("active");
+        current++;
+        if(current<=total){
+            document.getElementById("s"+current).classList.add("active");
+        }
+        if(current===7){
+            document.getElementById("finalName").innerText =
+            document.getElementById("username").value || "UNKNOWN";
+        }
     }
-    if(signFile){
-      const signRef = storage.ref('signature/' + regNo + '_' + Date.now() + '_' + signFile.name);
-      const snap2 = await signRef.put(signFile);
-      payload.signUrl = await snap2.ref.getDownloadURL();
+});
+
+// MATRIX EFFECT
+const canvas = document.querySelector(".matrix");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+let letters = "01";
+letters = letters.split("");
+let fontSize = 14;
+let columns = canvas.width / fontSize;
+let drops = [];
+for(let x=0;x<columns;x++) drops[x]=1;
+
+function draw(){
+    ctx.fillStyle="rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#0F0";
+    ctx.font=fontSize+"px monospace";
+    for(let i=0;i<drops.length;i++){
+        let text = letters[Math.floor(Math.random()*letters.length)];
+        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+        if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
+            drops[i]=0;
+        drops[i]++;
     }
-
-    // initialize payments (Jan-Dec current year)
-    const year = new Date().getFullYear();
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    payload.payments = {};
-    months.forEach(m => payload.payments[m + ' ' + year] = { rent: payload.rent || '', status: 'Not Done' });
-
-    // save to Realtime DB
-    await db.ref('users/' + regNo).set({ regNo, ...payload });
-
-    // show after screen
-    document.getElementById('regStatus').innerText = '';
-    document.getElementById('afterWelcome').innerText = `WELCOME MR. ${name.toUpperCase()} TO JP RESIDENCY`;
-    document.getElementById('afterRegNo').innerText = `YOUR REGISTRATION NUMBER IS ${regNo}`;
-    // store last regNo (for send function)
-    window._lastReg = regNo;
-    show('after');
-  } catch(err){
-    console.error(err);
-    alert('Error: ' + err.message);
-    document.getElementById('regStatus').innerText = '';
-  }
 }
-
-/* ------------------ SEND DETAILS TO OWNER (WhatsApp) ------------------ */
-function sendDetailsToOwner(){
-  const reg = window._lastReg;
-  if(!reg){ alert('No registration found'); return; }
-  db.ref('users/' + reg).once('value').then(snap=>{
-    const r = snap.val();
-    if(!r) return alert('Record missing');
-    const msg = `JP Residency New Guest\nRegNo: ${reg}\nName: ${r.name}\nPhone: ${r.phone}\nEmail: ${r.email}\nID: ${r.idType} ${r.idNumber}\nRent: ${r.rent}\nAdvance: ${r.advance}`;
-    const wa = 'https://wa.me/919942823314?text=' + encodeURIComponent(msg);
-    window.open(wa,'_blank');
-  });
-}
-
-/* ------------------ LOGIN ------------------ */
-async function onLogin(){
-  const reg = document.getElementById('l_reg').value.trim();
-  const pass = document.getElementById('l_pass').value;
-  if(!reg){ alert('Enter registration number'); return; }
-  // owner login
-  if(pass === 'AMS'){
-    // show owner panel
-    await loadOwnerTable();
-    show('ownerView');
-    return;
-  }
-  // normal user
-  const snap = await db.ref('users/' + reg).once('value');
-  if(!snap.exists()){ alert('Registration not found'); return; }
-  const data = snap.val();
-  if(data.password !== pass){ alert('Incorrect password'); return; }
-  // show user details
-  document.getElementById('u_name').innerText = data.name;
-  document.getElementById('u_details').innerText = toText({
-    'RegNo': data.regNo,
-    'Name': data.name,
-    'Phone': data.phone,
-    'Email': data.email,
-    'ID': data.idType + ' ' + data.idNumber,
-    'Room Rent': data.rent,
-    'Advance': data.advance
-  });
-  // show aadhar / sign images if present
-  if(data.aadhaarUrl || data.signUrl){
-    let imgs = '';
-    if(data.aadhaarUrl) imgs += `<div style="margin-top:12px"><b>Aadhaar Image</b><br><img src="${data.aadhaarUrl}" style="max-width:220px"></div>`;
-    if(data.signUrl) imgs += `<div style="margin-top:12px"><b>Signature</b><br><img src="${data.signUrl}" style="max-width:220px"></div>`;
-    document.getElementById('u_details').innerHTML += imgs;
-  }
-  show('userView');
-}
-
-/* ------------------ OWNER: LIST ALL USERS INTO TABLE ------------------ */
-async function loadOwnerTable(){
-  const tbody = document.querySelector('#ownerTable tbody');
-  tbody.innerHTML = '<tr><td colspan="8">Loading...</td></tr>';
-  const snap = await db.ref('users').once('value');
-  tbody.innerHTML = '';
-  if(!snap.exists()){ tbody.innerHTML = '<tr><td colspan="8">No records</td></tr>'; return; }
-  snap.forEach(child => {
-    const u = child.val();
-    const reg = child.key;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${reg}</td>
-      <td contenteditable="true">${u.name || ''}</td>
-      <td contenteditable="true">${u.phone || ''}</td>
-      <td contenteditable="true">${u.email || ''}</td>
-      <td contenteditable="true">${u.idNumber || ''}</td>
-      <td contenteditable="true">${u.rent || ''}</td>
-      <td contenteditable="true">${u.advance || ''}</td>
-      <td><button onclick="ownerDelete('${reg}')">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-/* ------------------ OWNER: SAVE CHANGES ------------------ */
-async function ownerSaveChanges(){
-  const rows = Array.from(document.querySelectorAll('#ownerTable tbody tr'));
-  const updates = {};
-  rows.forEach(row=>{
-    const reg = row.cells[0].innerText;
-    updates[reg] = {
-      name: row.cells[1].innerText,
-      phone: row.cells[2].innerText,
-      email: row.cells[3].innerText,
-      idNumber: row.cells[4].innerText,
-      rent: row.cells[5].innerText,
-      advance: row.cells[6].innerText
-    };
-  });
-  // write each entry
-  for(const reg in updates){
-    const u = updates[reg];
-    await db.ref('users/' + reg).update(u);
-  }
-  alert('Updates saved to Firebase.');
-  await loadOwnerTable();
-}
-
-/* ------------------ OWNER: DELETE ------------------ */
-async function ownerDelete(reg){
-  if(!confirm('Delete ' + reg + '?')) return;
-  await db.ref('users/' + reg).remove();
-  alert('Deleted ' + reg);
-  await loadOwnerTable();
-}
-
-/* ------------------ OWNER: send all to owner (WhatsApp) ------------------ */
-async function ownerSendAll(){
-  const snap = await db.ref('users').once('value');
-  if(!snap.exists()){ alert('No records'); return; }
-  let msg = 'JP Residency - All Guests\\n\\n';
-  snap.forEach(child=>{
-    const u = child.val();
-    msg += `Reg:${child.key} Name:${u.name} Phone:${u.phone} Rent:${u.rent} Advance:${u.advance}\\n`;
-  });
-  const wa = 'https://wa.me/919942823314?text=' + encodeURIComponent(msg);
-  window.open(wa,'_blank');
-}
-
-/* ------------------ UTILS ------------------ */
-function logout(){ show('home'); document.getElementById('loginMsg').innerText=''; }
-
-// show home initially
-show('home');
+setInterval(draw,33);
 </script>
+
 </body>
 </html>
+
