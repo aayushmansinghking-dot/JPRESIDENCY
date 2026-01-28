@@ -1,217 +1,281 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CLASSIFIED TERMINAL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Ayushman Gaming</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Courier New,monospace}
-body{background:black;color:#00ff00;overflow:hidden}
-.screen{display:none;width:100vw;height:100vh;padding:20px}
-.active{display:block}
-.center{
-height:100%;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-text-align:center
-}
-h1,h2{text-shadow:0 0 15px #00ff00}
-input{
-background:black;border:1px solid #00ff00;color:#00ff00;
-padding:12px;font-size:18px;width:80%;margin-top:20px
-}
-.loading{margin-top:20px;animation:blink 1s infinite}
-@keyframes blink{50%{opacity:0}}
-
-.scan{
-width:260px;height:260px;border:2px solid #00ff00;
-position:relative;margin-top:25px
-}
-.line{
-position:absolute;width:100%;height:4px;background:#00ff00;
-animation:scan 2s linear infinite
-}
-@keyframes scan{0%{top:0}100%{top:100%}}
-
-.face{
-width:260px;height:260px;
-border:2px dashed #00ff00;
-animation:blink 0.5s infinite
-}
-
-.btn{
-margin-top:25px;
-padding:10px 25px;
-border:1px solid #00ff00;
-background:black;
-color:#00ff00;
-font-size:16px;
-cursor:pointer;
-text-shadow:0 0 10px #00ff00;
-}
-.btn:hover{background:#00ff00;color:black}
-
-canvas{position:fixed;top:0;left:0;z-index:-1}
-pre{text-align:left;font-size:12px}
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;overflow-x:hidden;transition:background 2s;}
+h1,h2,h3{text-align:center;margin-bottom:15px;}
+.container{width:90%;max-width:900px;margin:auto;padding:20px;color:white;text-align:center;}
+input[type="text"],select{padding:10px;margin:5px;border-radius:5px;border:none;outline:none;font-size:16px;}
+button{padding:12px 25px;margin:10px;font-size:16px;border:none;border-radius:15px;cursor:pointer;background:#00ffea;color:#000;font-weight:bold;text-shadow:0 0 5px #fff;box-shadow:0 0 15px #0ff;transition:0.3s;}
+button:hover{transform:scale(1.1);box-shadow:0 0 30px #0ff,0 0 40px #00ffea;}
+.hidden{display:none;}
+.player-box{margin:10px 0;}
+.fade{animation:fadein 0.5s;}
+@keyframes fadein{from{opacity:0;}to{opacity:1;}}
+.result-box{display:flex;flex-wrap:wrap;justify-content:center;margin-top:20px;}
+.card{background:#222;border-radius:20px;padding:15px;margin:10px;min-width:150px;text-align:center;box-shadow:0 0 25px rgba(0,255,255,0.5);transition: transform 0.3s;}
+.card:hover{transform:scale(1.05);}
 </style>
 </head>
-
 <body>
 
-<canvas id="matrix"></canvas>
+<!-- PAGE 1: Player Registration -->
+<div id="page1" class="container fade">
+<h1>Ayushman Gaming</h1>
+<h2>Enter Player Names</h2>
+<div id="playersContainer"></div>
+<button id="playGameBtn" class="hidden">Play the Game</button>
+</div>
 
-<audio id="bgm" loop>
-<source src="https://cdn.pixabay.com/audio/2022/10/18/audio_8bca2dfcb5.mp3">
-</audio>
+<!-- PAGE 2: Safe/Imposter -->
+<div id="page2" class="container hidden fade">
+<h2 id="currentPlayerName"></h2>
+<button id="confidentialBtn">Confidential</button>
+<h3 id="resultDisplay"></h3>
+<button id="nextPlayerBtn" class="hidden">Next Player</button>
+</div>
 
-<audio id="beep">
-<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_5b3a5c78c5.mp3">
-</audio>
+<!-- PAGE 3: Questions -->
+<div id="page3" class="container hidden fade">
+<h2 id="questionPlayerName"></h2>
+<div id="questionContainer">
+<p id="questionText"></p>
+<input type="text" id="answerInput" placeholder="Your answer">
+<button id="nextQuestionBtn">Next</button>
+</div>
+</div>
 
-<!-- SCREEN 1 -->
-<div class="screen active" id="s1"><div class="center">
-<h1>SECURE TERMINAL</h1>
-<p>ENTER AGENT NAME</p>
-<input id="name">
-<p class="loading">INITIALIZING...</p>
-<button class="btn" onclick="next()">PRESS ENTER / TAP</button>
-</div></div>
+<!-- PAGE 4: Voting -->
+<div id="page4" class="container hidden fade">
+<h1>Vote the Imposter</h1>
+<div id="votingContainer"></div>
+<button id="submitVoteBtn">Submit Votes</button>
+</div>
 
-<!-- SCREEN 2 -->
-<div class="screen" id="s2"><div class="center">
-<h1>DEVICE DETECTED</h1>
-<p>OS: ANDROID / WINDOWS</p>
-<p>IP: 192.168.***.***</p>
-<p class="loading">LOCATION: INDIA</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
+<!-- PAGE 5: Voting Result -->
+<div id="page5" class="container hidden fade">
+<h1 id="votingResultText"></h1>
+<div id="finalResult" class="result-box"></div>
+</div>
 
-<!-- SCREEN 3 -->
-<div class="screen" id="s3"><div class="center">
-<h1>ACE CORE SCAN</h1>
-<div class="scan"><div class="line"></div></div>
-<p class="loading">SCANNING MEMORY</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 4 -->
-<div class="screen" id="s4"><div class="center">
-<h1>FINGERPRINT SCAN</h1>
-<div class="scan"><div class="line"></div></div>
-<p class="loading">MATCH FOUND</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 5 -->
-<div class="screen" id="s5"><div class="center">
-<h1>RETINA SCAN</h1>
-<div class="scan"><div class="line"></div></div>
-<p class="loading">EYE VERIFIED</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 6 -->
-<div class="screen" id="s6"><div class="center">
-<h1>FACE SCAN</h1>
-<div class="face"></div>
-<p class="loading">FACIAL MATCH</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 7 -->
-<div class="screen" id="s7"><div class="center">
-<h1>PASSWORD CRACKING</h1>
-<pre class="loading">
-████████▒▒▒▒▒▒ 78%
-</pre>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 8 -->
-<div class="screen" id="s8"><div class="center">
-<h1>SOCIAL DATA ACCESS</h1>
-<p>WhatsApp ✓</p>
-<p>Instagram ✓</p>
-<p class="loading">SYNC COMPLETE</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 9 -->
-<div class="screen" id="s9"><div class="center">
-<h1>SATELLITE TRACKING</h1>
-<p>GPS LOCKED</p>
-<p class="loading">TARGET FOUND</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 10 -->
-<div class="screen" id="s10"><div class="center">
-<h1>DECRYPTING FILES</h1>
-<p class="loading">010101010101...</p>
-<button class="btn" onclick="next()">CONTINUE</button>
-</div></div>
-
-<!-- SCREEN 11 -->
-<div class="screen" id="s11"><div class="center">
-<h1>ACCESS GRANTED</h1>
-<h2 id="final"></h2>
-<p class="loading">SYSTEM ONLINE</p>
-</div></div>
+<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
 
 <script>
-let c=1,total=11;
-const beep=document.getElementById("beep");
-const bgm=document.getElementById("bgm");
-bgm.volume=0.35;
+// ---------------- SETTINGS ----------------
+const characters = ["ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO","RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND","PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"];
+let players = [];
+let assignedCharacter = ""; 
+let imposter = "";
+let currentIndex = 0;
+let questionIndex = 0;
+let questionList = [];
+let questionAnswers = {};
+let votes = {};
+let maxAgeCurrent = 0;
 
-function speak(text){
-let msg=new SpeechSynthesisUtterance(text);
-msg.rate=0.9;msg.pitch=0.8;
-speechSynthesis.speak(msg);
-}
+// BACKGROUND COLOR ANIMATION
+const colors=["#ff4b1f","#1fddff","#ffb347","#6a11cb","#ff4e50","#1fd1f9","#f7971e"];
+let colorIndex=0;
+function animateBackground(){document.body.style.background=colors[colorIndex];colorIndex=(colorIndex+1)%colors.length;setTimeout(animateBackground,3000);}
+animateBackground();
 
-function next(){
-beep.play();
-if(c===1) bgm.play();
-document.getElementById("s"+c).classList.remove("active");
-c++;
-if(c<=total) document.getElementById("s"+c).classList.add("active");
-if(c===11){
-let n=document.getElementById("name").value||"UNKNOWN AGENT";
-document.getElementById("final").innerText=n;
-speak("Access granted. Welcome agent "+n);
+// ---------------- PAGE 1 ----------------
+const playersContainer=document.getElementById('playersContainer');
+const playGameBtn=document.getElementById('playGameBtn');
+function addPlayerInput(){
+    const div=document.createElement('div');
+    div.classList.add('player-box');
+    const input=document.createElement('input');
+    input.type='text';
+    input.placeholder=`Player ${playersContainer.children.length+1} Name`;
+    input.addEventListener('input',()=>{
+        const inputs=Array.from(playersContainer.querySelectorAll('input'));
+        const lastInput=inputs[inputs.length-1];
+        if(lastInput.value.trim()!==""){addPlayerInput();}
+        togglePlayButton();
+    });
+    div.appendChild(input);
+    playersContainer.appendChild(div);
 }
+function togglePlayButton(){
+    const filled=Array.from(playersContainer.querySelectorAll('input')).filter(i=>i.value.trim()!=="");
+    playGameBtn.classList.toggle('hidden',filled.length<2);
 }
-
-document.addEventListener("keydown",e=>{
-if(e.key==="Enter") next();
+addPlayerInput();
+playGameBtn.addEventListener('click',()=>{
+    players=Array.from(playersContainer.querySelectorAll('input')).map(i=>i.value.trim()).filter(n=>n!=="");
+    assignImposterAndCharacter();
+    showPage2();
 });
 
-// MATRIX EFFECT
-const canvas=document.getElementById("matrix");
-const ctx=canvas.getContext("2d");
-canvas.width=innerWidth;canvas.height=innerHeight;
-let letters="01".split(""),fs=14;
-let cols=canvas.width/fs,drops=[];
-for(let i=0;i<cols;i++)drops[i]=1;
-function draw(){
-ctx.fillStyle="rgba(0,0,0,0.05)";
-ctx.fillRect(0,0,canvas.width,canvas.height);
-ctx.fillStyle="#0F0";ctx.font=fs+"px monospace";
-for(let i=0;i<drops.length;i++){
-let t=letters[Math.floor(Math.random()*letters.length)];
-ctx.fillText(t,i*fs,drops[i]*fs);
-if(drops[i]*fs>canvas.height&&Math.random()>0.975)drops[i]=0;
-drops[i]++;
-}}
-setInterval(draw,33);
-</script>
+// ---------------- PAGE 2 ----------------
+const page1=document.getElementById('page1');
+const page2=document.getElementById('page2');
+const currentPlayerName=document.getElementById('currentPlayerName');
+const confidentialBtn=document.getElementById('confidentialBtn');
+const resultDisplay=document.getElementById('resultDisplay');
+const nextPlayerBtn=document.getElementById('nextPlayerBtn');
 
+function assignImposterAndCharacter(){
+    const randIndex=Math.floor(Math.random()*players.length);
+    imposter=players[randIndex];
+    assignedCharacter=characters[Math.floor(Math.random()*characters.length)];
+}
+
+function showPage2(){
+    page1.classList.add('hidden');
+    page2.classList.remove('hidden');
+    currentIndex=0;
+    loadCurrentPlayer();
+}
+function loadCurrentPlayer(){
+    const player=players[currentIndex];
+    currentPlayerName.textContent=player;
+    resultDisplay.textContent="";
+    confidentialBtn.classList.remove('hidden');
+    nextPlayerBtn.classList.add('hidden');
+}
+confidentialBtn.addEventListener('click',()=>{
+    const player=players[currentIndex];
+    if(player===imposter){resultDisplay.textContent="Imposter ❌";}
+    else{resultDisplay.textContent=`Safe ✅ - Character: ${assignedCharacter}`;}
+    confidentialBtn.classList.add('hidden');
+    nextPlayerBtn.classList.remove('hidden');
+});
+nextPlayerBtn.addEventListener('click',()=>{
+    currentIndex++;
+    if(currentIndex<players.length){loadCurrentPlayer();}
+    else{showPage3();}
+});
+
+// ---------------- PAGE 3 ----------------
+const page3=document.getElementById('page3');
+const questionPlayerName=document.getElementById('questionPlayerName');
+const questionText=document.getElementById('questionText');
+const answerInput=document.getElementById('answerInput');
+const nextQuestionBtn=document.getElementById('nextQuestionBtn');
+
+function generateQuestions(maxAge){
+    const q=[];
+    q.push("Relation to character");
+    q.push("Maximum age of character");
+    if(maxAge>30){q.push("Number of child character have");q.push("Does character is in DARING IDIOTS?");}
+    q.push("Does character have beard?");
+    q.push("Does character wear jeans?");
+    q.push(`How character is related to ${characters[Math.floor(Math.random()*characters.length)]}?`);
+    q.push("Does character is present here?");
+    return q;
+}
+
+function showPage3(){
+    page2.classList.add('hidden');
+    page3.classList.remove('hidden');
+    currentIndex=0;
+    questionIndex=0;
+    loadQuestionForPlayer();
+}
+
+function loadQuestionForPlayer(){
+    const player=players[currentIndex];
+    questionPlayerName.textContent=player;
+    if(!questionList[currentIndex]){
+        maxAgeCurrent= Math.floor(Math.random()*60)+10; // simulate maximum age
+        questionList[currentIndex]=generateQuestions(maxAgeCurrent);
+    }
+    questionText.textContent=questionList[currentIndex][questionIndex];
+    answerInput.value="";
+}
+
+nextQuestionBtn.addEventListener('click',()=>{
+    const player=players[currentIndex];
+    if(!questionAnswers[player]) questionAnswers[player]=[];
+    questionAnswers[player].push(answerInput.value.trim());
+    questionIndex++;
+    if(questionIndex<questionList[currentIndex].length){loadQuestionForPlayer();}
+    else{questionIndex=0;currentIndex++;if(currentIndex<players.length){loadQuestionForPlayer();}
+    else{showPage4();}}
+});
+
+// ---------------- PAGE 4: Voting ----------------
+const page4=document.getElementById('page4');
+const votingContainer=document.getElementById('votingContainer');
+const submitVoteBtn=document.getElementById('submitVoteBtn');
+
+function showPage4(){
+    page3.classList.add('hidden');
+    page4.classList.remove('hidden');
+    votingContainer.innerHTML="";
+    players.forEach(p=>{
+        const div=document.createElement('div');
+        div.innerHTML=`<h3>${p}</h3><select id="vote_${p}">${players.map(pl=>`<option value="${pl}">${pl}</option>`).join('')}</select>`;
+        votingContainer.appendChild(div);
+    });
+}
+submitVoteBtn.addEventListener('click',()=>{
+    votes={};
+    players.forEach(p=>{
+        const selected=document.getElementById(`vote_${p}`).value;
+        votes[selected]=(votes[selected]||0)+1;
+    });
+    showPage5();
+});
+
+// ---------------- PAGE 5: Voting Result + CONFETTI ----------------
+const page5=document.getElementById('page5');
+const votingResultText=document.getElementById('votingResultText');
+const finalResult=document.getElementById('finalResult');
+
+const canvas=document.getElementById('confettiCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+const confetti=[];
+
+function createConfetti(){
+    for(let i=0;i<150;i++){
+        confetti.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*6+4,d:Math.random()*15+5,color:`hsl(${Math.random()*360},100%,50%)`,tilt:Math.random()*10-10});
+    }
+}
+function drawConfetti(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    confetti.forEach(f=>{
+        ctx.beginPath();
+        ctx.lineWidth=2;
+        ctx.strokeStyle=f.color;
+        ctx.moveTo(f.x,f.y);
+        ctx.lineTo(f.x+f.tilt,f.y+f.r);
+        ctx.stroke();
+        f.x+=Math.sin(f.d/10); f.y+=f.d/2; f.tilt+=0.1;
+        if(f.y>canvas.height){f.y=0;f.x=Math.random()*canvas.width;}
+    });
+    requestAnimationFrame(drawConfetti);
+}
+
+function showPage5(){
+    page4.classList.add('hidden');
+    page5.classList.remove('hidden');
+    const maxVotes=Math.max(...Object.values(votes));
+    const imposterVotes=votes[imposter]||0;
+    if(Object.values(votes).filter(v=>v===maxVotes).length>1){votingResultText.textContent="It's a Draw!";}
+    else if(imposterVotes===maxVotes){votingResultText.textContent="Imposter lost the game! You win!";createConfetti();drawConfetti();}
+    else{votingResultText.textContent="Sorry, Imposter wins!";}
+    finalResult.innerHTML="";
+    players.forEach(p=>{
+        const div=document.createElement('div');
+        div.classList.add('card');
+        div.innerHTML=`<h3>${p}</h3><p>${p===imposter?'Imposter ❌':'Safe ✅ - Character: '+assignedCharacter}</p>`;
+        finalResult.appendChild(div);
+    });
+}
+</script>
 </body>
 </html>
+
 
 
 
