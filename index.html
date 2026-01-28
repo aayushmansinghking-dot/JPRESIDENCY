@@ -7,16 +7,14 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;overflow-x:hidden;background:#111;animation:neonBg 15s infinite linear;}
-@keyframes neonBg{
-0%{background:linear-gradient(45deg,#ff0066,#00ffff);}
-25%{background:linear-gradient(90deg,#ffcc00,#ff00ff);}
-50%{background:linear-gradient(135deg,#00ffcc,#ff0066);}
-75%{background:linear-gradient(180deg,#ff00ff,#00ff00);}
-100%{background:linear-gradient(225deg,#00ffff,#ffcc00);}
+body{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100vh;overflow-x:hidden;
+    background: url('your-image.jpg') no-repeat center center fixed;
+    background-size: cover;
 }
 h1,h2,h3{text-align:center;margin-bottom:15px;}
-.container{width:90%;max-width:900px;margin:auto;padding:20px;color:white;text-align:center;}
+.container{width:90%;max-width:900px;margin:auto;padding:20px;color:white;text-align:center;background:rgba(0,0,0,0.5);border-radius:15px;}
 input[type="text"],select{padding:10px;margin:5px;border-radius:5px;border:none;outline:none;font-size:16px;box-shadow:0 0 10px #00ffea;}
 button{padding:12px 25px;margin:10px;font-size:16px;border:none;border-radius:15px;cursor:pointer;background:#00ffea;color:#000;font-weight:bold;text-shadow:0 0 5px #fff;box-shadow:0 0 15px #0ff;transition:0.3s;}
 button:hover{transform:scale(1.1);box-shadow:0 0 30px #0ff,0 0 40px #00ffea;}
@@ -69,8 +67,6 @@ button:hover{transform:scale(1.1);box-shadow:0 0 30px #0ff,0 0 40px #00ffea;}
 <h1 id="votingResultText"></h1>
 <div id="finalResult" class="result-box"></div>
 </div>
-
-<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
 
 <script>
 // ---------------- SETTINGS ----------------
@@ -185,32 +181,17 @@ submitVoteBtn.addEventListener('click',()=>{
     showPage5();
 });
 
-// ---------------- PAGE 5: Voting Result + Confetti ----------------
+// ---------------- PAGE 5: Voting Result ----------------
 const page5=document.getElementById('page5');
 const votingResultText=document.getElementById('votingResultText');
 const finalResult=document.getElementById('finalResult');
-const canvas=document.getElementById('confettiCanvas');const ctx=canvas.getContext('2d');
-canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-const confetti=[];
 
-function createConfetti(){
-    for(let i=0;i<150;i++){confetti.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*6+4,d:Math.random()*15+5,color:`hsl(${Math.random()*360},100%,50%)`,tilt:Math.random()*10-10});}
-}
-function drawConfetti(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    confetti.forEach(f=>{
-        ctx.beginPath();ctx.lineWidth=2;ctx.strokeStyle=f.color;
-        ctx.moveTo(f.x,f.y);ctx.lineTo(f.x+f.tilt,f.y+f.r);ctx.stroke();
-        f.x+=Math.sin(f.d/10); f.y+=f.d/2; f.tilt+=0.1;
-        if(f.y>canvas.height){f.y=0;f.x=Math.random()*canvas.width;}
-    });requestAnimationFrame(drawConfetti);
-}
 function showPage5(){
     page4.classList.add('hidden');page5.classList.remove('hidden');
     const maxVotes=Math.max(...Object.values(votes));
     const imposterVotes=votes[imposter]||0;
     if(Object.values(votes).filter(v=>v===maxVotes).length>1){votingResultText.textContent="It's a Draw!";}
-    else if(imposterVotes===maxVotes){votingResultText.textContent="Imposter lost the game! You win!";createConfetti();drawConfetti();}
+    else if(imposterVotes===maxVotes){votingResultText.textContent="Imposter lost the game! You win!";}
     else{votingResultText.textContent="Sorry, Imposter wins!";}
     finalResult.innerHTML="";
     players.forEach(p=>{
@@ -222,3 +203,4 @@ function showPage5(){
 </script>
 </body>
 </html>
+
