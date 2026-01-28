@@ -4,13 +4,21 @@
 <meta charset="UTF-8">
 <title>CLASSIFIED TERMINAL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Courier New,monospace}
 body{background:black;color:#00ff00;overflow:hidden}
 .screen{display:none;width:100vw;height:100vh;padding:20px}
 .active{display:block}
-.center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-h1,h2{ text-shadow:0 0 15px #00ff00 }
+.center{
+height:100%;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center
+}
+h1,h2{text-shadow:0 0 15px #00ff00}
 input{
 background:black;border:1px solid #00ff00;color:#00ff00;
 padding:12px;font-size:18px;width:80%;margin-top:20px
@@ -34,8 +42,20 @@ border:2px dashed #00ff00;
 animation:blink 0.5s infinite
 }
 
+.btn{
+margin-top:25px;
+padding:10px 25px;
+border:1px solid #00ff00;
+background:black;
+color:#00ff00;
+font-size:16px;
+cursor:pointer;
+text-shadow:0 0 10px #00ff00;
+}
+.btn:hover{background:#00ff00;color:black}
+
 canvas{position:fixed;top:0;left:0;z-index:-1}
-pre{font-size:12px;text-align:left}
+pre{text-align:left;font-size:12px}
 </style>
 </head>
 
@@ -51,72 +71,90 @@ pre{font-size:12px;text-align:left}
 <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_5b3a5c78c5.mp3">
 </audio>
 
-<!-- SCREENS -->
-<div class="screen active" id="s1">
-<div class="center">
+<!-- SCREEN 1 -->
+<div class="screen active" id="s1"><div class="center">
 <h1>SECURE TERMINAL</h1>
 <p>ENTER AGENT NAME</p>
 <input id="name">
-<p class="loading">PRESS ENTER</p>
+<p class="loading">INITIALIZING...</p>
+<button class="btn" onclick="next()">PRESS ENTER / TAP</button>
 </div></div>
 
+<!-- SCREEN 2 -->
 <div class="screen" id="s2"><div class="center">
 <h1>DEVICE DETECTED</h1>
 <p>OS: ANDROID / WINDOWS</p>
 <p>IP: 192.168.***.***</p>
 <p class="loading">LOCATION: INDIA</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 3 -->
 <div class="screen" id="s3"><div class="center">
 <h1>ACE CORE SCAN</h1>
 <div class="scan"><div class="line"></div></div>
-<p class="loading">ANALYZING MEMORY</p>
+<p class="loading">SCANNING MEMORY</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 4 -->
 <div class="screen" id="s4"><div class="center">
 <h1>FINGERPRINT SCAN</h1>
 <div class="scan"><div class="line"></div></div>
 <p class="loading">MATCH FOUND</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 5 -->
 <div class="screen" id="s5"><div class="center">
 <h1>RETINA SCAN</h1>
 <div class="scan"><div class="line"></div></div>
 <p class="loading">EYE VERIFIED</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 6 -->
 <div class="screen" id="s6"><div class="center">
 <h1>FACE SCAN</h1>
 <div class="face"></div>
-<p class="loading">FACIAL PATTERN MATCHED</p>
+<p class="loading">FACIAL MATCH</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 7 -->
 <div class="screen" id="s7"><div class="center">
-<h1>CRACKING PASSWORD</h1>
+<h1>PASSWORD CRACKING</h1>
 <pre class="loading">
-BruteForce.exe
-██████▒▒▒▒▒▒ 67%
+████████▒▒▒▒▒▒ 78%
 </pre>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 8 -->
 <div class="screen" id="s8"><div class="center">
 <h1>SOCIAL DATA ACCESS</h1>
-<p>WhatsApp: ✓</p>
-<p>Instagram: ✓</p>
+<p>WhatsApp ✓</p>
+<p>Instagram ✓</p>
 <p class="loading">SYNC COMPLETE</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 9 -->
 <div class="screen" id="s9"><div class="center">
 <h1>SATELLITE TRACKING</h1>
 <p>GPS LOCKED</p>
-<p class="loading">TARGET ACQUIRED</p>
+<p class="loading">TARGET FOUND</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 10 -->
 <div class="screen" id="s10"><div class="center">
 <h1>DECRYPTING FILES</h1>
-<p class="loading">0100101010100101...</p>
+<p class="loading">010101010101...</p>
+<button class="btn" onclick="next()">CONTINUE</button>
 </div></div>
 
+<!-- SCREEN 11 -->
 <div class="screen" id="s11"><div class="center">
 <h1>ACCESS GRANTED</h1>
 <h2 id="final"></h2>
@@ -135,8 +173,7 @@ msg.rate=0.9;msg.pitch=0.8;
 speechSynthesis.speak(msg);
 }
 
-document.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
+function next(){
 beep.play();
 if(c===1) bgm.play();
 document.getElementById("s"+c).classList.remove("active");
@@ -148,9 +185,12 @@ document.getElementById("final").innerText=n;
 speak("Access granted. Welcome agent "+n);
 }
 }
+
+document.addEventListener("keydown",e=>{
+if(e.key==="Enter") next();
 });
 
-// MATRIX
+// MATRIX EFFECT
 const canvas=document.getElementById("matrix");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;canvas.height=innerHeight;
@@ -172,5 +212,6 @@ setInterval(draw,33);
 
 </body>
 </html>
+
 
 
