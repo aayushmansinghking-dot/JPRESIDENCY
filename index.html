@@ -1,206 +1,176 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>ACCESS TERMINAL</title>
+<title>CLASSIFIED TERMINAL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: "Courier New", monospace;
-}
-body{
-    background:black;
-    color:#00ff00;
-    overflow:hidden;
-}
-.screen{
-    display:none;
-    width:100vw;
-    height:100vh;
-    padding:20px;
-}
-.active{
-    display:block;
-}
-.center{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    height:100%;
-}
-h1{
-    text-shadow:0 0 10px #00ff00;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Courier New,monospace}
+body{background:black;color:#00ff00;overflow:hidden}
+.screen{display:none;width:100vw;height:100vh;padding:20px}
+.active{display:block}
+.center{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+h1,h2{ text-shadow:0 0 15px #00ff00 }
 input{
-    background:black;
-    border:1px solid #00ff00;
-    color:#00ff00;
-    padding:10px;
-    font-size:18px;
-    width:80%;
-    margin-top:20px;
-    outline:none;
+background:black;border:1px solid #00ff00;color:#00ff00;
+padding:12px;font-size:18px;width:80%;margin-top:20px
 }
-.scan-box{
-    width:300px;
-    height:300px;
-    border:2px solid #00ff00;
-    position:relative;
-    margin-top:30px;
+.loading{margin-top:20px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:0}}
+
+.scan{
+width:260px;height:260px;border:2px solid #00ff00;
+position:relative;margin-top:25px
 }
-.scan-line{
-    position:absolute;
-    width:100%;
-    height:4px;
-    background:#00ff00;
-    animation:scan 2s linear infinite;
+.line{
+position:absolute;width:100%;height:4px;background:#00ff00;
+animation:scan 2s linear infinite
 }
-@keyframes scan{
-    0%{top:0}
-    100%{top:100%}
+@keyframes scan{0%{top:0}100%{top:100%}}
+
+.face{
+width:260px;height:260px;
+border:2px dashed #00ff00;
+animation:blink 0.5s infinite
 }
-.loading{
-    margin-top:20px;
-    animation:blink 1s infinite;
-}
-@keyframes blink{
-    50%{opacity:0}
-}
-.matrix{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    pointer-events:none;
-}
+
+canvas{position:fixed;top:0;left:0;z-index:-1}
+pre{font-size:12px;text-align:left}
 </style>
 </head>
 
 <body>
 
-<canvas class="matrix"></canvas>
+<canvas id="matrix"></canvas>
 
-<!-- SCREEN 1 -->
+<audio id="bgm" loop>
+<source src="https://cdn.pixabay.com/audio/2022/10/18/audio_8bca2dfcb5.mp3">
+</audio>
+
+<audio id="beep">
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_5b3a5c78c5.mp3">
+</audio>
+
+<!-- SCREENS -->
 <div class="screen active" id="s1">
-    <div class="center">
-        <h1>INITIALIZE ACCESS TERMINAL</h1>
-        <p>ENTER YOUR NAME</p>
-        <input id="username" placeholder="TYPE HERE...">
-        <p class="loading">PRESS ENTER TO CONTINUE</p>
-    </div>
-</div>
+<div class="center">
+<h1>SECURE TERMINAL</h1>
+<p>ENTER AGENT NAME</p>
+<input id="name">
+<p class="loading">PRESS ENTER</p>
+</div></div>
 
-<!-- SCREEN 2 -->
-<div class="screen" id="s2">
-    <div class="center">
-        <h1>IDENTITY LOADING...</h1>
-        <p class="loading">VERIFYING USER PROFILE...</p>
-    </div>
-</div>
+<div class="screen" id="s2"><div class="center">
+<h1>DEVICE DETECTED</h1>
+<p>OS: ANDROID / WINDOWS</p>
+<p>IP: 192.168.***.***</p>
+<p class="loading">LOCATION: INDIA</p>
+</div></div>
 
-<!-- SCREEN 3 -->
-<div class="screen" id="s3">
-    <div class="center">
-        <h1>ACE SYSTEM SCAN</h1>
-        <div class="scan-box">
-            <div class="scan-line"></div>
-        </div>
-        <p class="loading">SCANNING DATA...</p>
-    </div>
-</div>
+<div class="screen" id="s3"><div class="center">
+<h1>ACE CORE SCAN</h1>
+<div class="scan"><div class="line"></div></div>
+<p class="loading">ANALYZING MEMORY</p>
+</div></div>
 
-<!-- SCREEN 4 -->
-<div class="screen" id="s4">
-    <div class="center">
-        <h1>FINGERPRINT AUTHENTICATION</h1>
-        <div class="scan-box">
-            <div class="scan-line"></div>
-        </div>
-        <p class="loading">MATCHING BIOMETRICS...</p>
-    </div>
-</div>
+<div class="screen" id="s4"><div class="center">
+<h1>FINGERPRINT SCAN</h1>
+<div class="scan"><div class="line"></div></div>
+<p class="loading">MATCH FOUND</p>
+</div></div>
 
-<!-- SCREEN 5 -->
-<div class="screen" id="s5">
-    <div class="center">
-        <h1>RETINA SCAN</h1>
-        <div class="scan-box">
-            <div class="scan-line"></div>
-        </div>
-        <p class="loading">EYE PATTERN VERIFIED...</p>
-    </div>
-</div>
+<div class="screen" id="s5"><div class="center">
+<h1>RETINA SCAN</h1>
+<div class="scan"><div class="line"></div></div>
+<p class="loading">EYE VERIFIED</p>
+</div></div>
 
-<!-- SCREEN 6 -->
-<div class="screen" id="s6">
-    <div class="center">
-        <h1>DECRYPTING SYSTEM FILES</h1>
-        <p class="loading">010101101010110010...</p>
-    </div>
-</div>
+<div class="screen" id="s6"><div class="center">
+<h1>FACE SCAN</h1>
+<div class="face"></div>
+<p class="loading">FACIAL PATTERN MATCHED</p>
+</div></div>
 
-<!-- SCREEN 7 -->
-<div class="screen" id="s7">
-    <div class="center">
-        <h1>ACCESS GRANTED</h1>
-        <p>WELCOME AGENT</p>
-        <h2 id="finalName"></h2>
-        <p class="loading">SYSTEM ONLINE</p>
-    </div>
-</div>
+<div class="screen" id="s7"><div class="center">
+<h1>CRACKING PASSWORD</h1>
+<pre class="loading">
+BruteForce.exe
+██████▒▒▒▒▒▒ 67%
+</pre>
+</div></div>
+
+<div class="screen" id="s8"><div class="center">
+<h1>SOCIAL DATA ACCESS</h1>
+<p>WhatsApp: ✓</p>
+<p>Instagram: ✓</p>
+<p class="loading">SYNC COMPLETE</p>
+</div></div>
+
+<div class="screen" id="s9"><div class="center">
+<h1>SATELLITE TRACKING</h1>
+<p>GPS LOCKED</p>
+<p class="loading">TARGET ACQUIRED</p>
+</div></div>
+
+<div class="screen" id="s10"><div class="center">
+<h1>DECRYPTING FILES</h1>
+<p class="loading">0100101010100101...</p>
+</div></div>
+
+<div class="screen" id="s11"><div class="center">
+<h1>ACCESS GRANTED</h1>
+<h2 id="final"></h2>
+<p class="loading">SYSTEM ONLINE</p>
+</div></div>
 
 <script>
-let current = 1;
-const total = 7;
+let c=1,total=11;
+const beep=document.getElementById("beep");
+const bgm=document.getElementById("bgm");
+bgm.volume=0.35;
 
-document.addEventListener("keydown", e=>{
-    if(e.key==="Enter"){
-        document.getElementById("s"+current).classList.remove("active");
-        current++;
-        if(current<=total){
-            document.getElementById("s"+current).classList.add("active");
-        }
-        if(current===7){
-            document.getElementById("finalName").innerText =
-            document.getElementById("username").value || "UNKNOWN";
-        }
-    }
+function speak(text){
+let msg=new SpeechSynthesisUtterance(text);
+msg.rate=0.9;msg.pitch=0.8;
+speechSynthesis.speak(msg);
+}
+
+document.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+beep.play();
+if(c===1) bgm.play();
+document.getElementById("s"+c).classList.remove("active");
+c++;
+if(c<=total) document.getElementById("s"+c).classList.add("active");
+if(c===11){
+let n=document.getElementById("name").value||"UNKNOWN AGENT";
+document.getElementById("final").innerText=n;
+speak("Access granted. Welcome agent "+n);
+}
+}
 });
 
-// MATRIX EFFECT
-const canvas = document.querySelector(".matrix");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-let letters = "01";
-letters = letters.split("");
-let fontSize = 14;
-let columns = canvas.width / fontSize;
-let drops = [];
-for(let x=0;x<columns;x++) drops[x]=1;
-
+// MATRIX
+const canvas=document.getElementById("matrix");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth;canvas.height=innerHeight;
+let letters="01".split(""),fs=14;
+let cols=canvas.width/fs,drops=[];
+for(let i=0;i<cols;i++)drops[i]=1;
 function draw(){
-    ctx.fillStyle="rgba(0,0,0,0.05)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle="#0F0";
-    ctx.font=fontSize+"px monospace";
-    for(let i=0;i<drops.length;i++){
-        let text = letters[Math.floor(Math.random()*letters.length)];
-        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-        if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
-            drops[i]=0;
-        drops[i]++;
-    }
-}
+ctx.fillStyle="rgba(0,0,0,0.05)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle="#0F0";ctx.font=fs+"px monospace";
+for(let i=0;i<drops.length;i++){
+let t=letters[Math.floor(Math.random()*letters.length)];
+ctx.fillText(t,i*fs,drops[i]*fs);
+if(drops[i]*fs>canvas.height&&Math.random()>0.975)drops[i]=0;
+drops[i]++;
+}}
 setInterval(draw,33);
 </script>
 
 </body>
 </html>
+
 
