@@ -2,206 +2,292 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Aayushman Gaming</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ayushman Gaming</title>
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
-body{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    min-height:100vh;overflow-x:hidden;
-    background: url(your-image.jpg) no-repeat center center fixed;
-    background-size: cover;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Orbitron',sans-serif;
 }
-h1,h2,h3{text-align:center;margin-bottom:15px;}
-.container{width:90%;max-width:900px;margin:auto;padding:20px;color:white;text-align:center;background:rgba(0,0,0,0.5);border-radius:15px;}
-input[type="text"],select{padding:10px;margin:5px;border-radius:5px;border:none;outline:none;font-size:16px;box-shadow:0 0 10px #00ffea;}
-button{padding:12px 25px;margin:10px;font-size:16px;border:none;border-radius:15px;cursor:pointer;background:#00ffea;color:#000;font-weight:bold;text-shadow:0 0 5px #fff;box-shadow:0 0 15px #0ff;transition:0.3s;}
-button:hover{transform:scale(1.1);box-shadow:0 0 30px #0ff,0 0 40px #00ffea;}
+
+body{
+    min-height:100vh;
+    background-image:url("your-image.jpg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:linear-gradient(120deg,rgba(0,0,0,.6),rgba(0,20,40,.6));
+    z-index:-1;
+}
+
+/* COMMON */
+.page{
+    width:90%;
+    max-width:950px;
+    padding:30px;
+    background:rgba(0,0,0,0.6);
+    border-radius:25px;
+    box-shadow:0 0 40px rgba(0,255,255,.4);
+    color:#fff;
+    text-align:center;
+    animation:fadeIn .8s ease;
+}
 .hidden{display:none;}
-.player-box{margin:10px 0;}
-.fade{animation:fadein 0.5s;}
-@keyframes fadein{from{opacity:0;}to{opacity:1;}}
-.result-box{display:flex;flex-wrap:wrap;justify-content:center;margin-top:20px;}
-.card{background:#222;border-radius:20px;padding:15px;margin:10px;min-width:150px;text-align:center;box-shadow:0 0 25px rgba(0,255,255,0.5);transition: transform 0.3s;}
-.card:hover{transform:scale(1.05);}
+
+@keyframes fadeIn{
+    from{opacity:0;transform:scale(.95);}
+    to{opacity:1;transform:scale(1);}
+}
+
+/* BIG TITLE */
+.big-title{
+    font-size:clamp(2.5rem,6vw,5rem);
+    color:#00ffff;
+    text-shadow:
+        0 0 10px #0ff,
+        0 0 30px #0ff,
+        0 0 60px #0ff;
+    margin-bottom:25px;
+    animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+    from{text-shadow:0 0 15px #0ff;}
+    to{text-shadow:0 0 40px #0ff,0 0 80px #00f;}
+}
+
+/* INPUTS */
+input, select{
+    width:80%;
+    max-width:400px;
+    padding:12px;
+    margin:10px auto;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    outline:none;
+    box-shadow:0 0 15px #00ffff;
+    text-align:center;
+}
+
+/* NEON BUTTONS */
+button{
+    padding:14px 35px;
+    margin:15px;
+    border:none;
+    border-radius:20px;
+    font-size:16px;
+    cursor:pointer;
+    background:linear-gradient(135deg,#00ffff,#0066ff);
+    color:#000;
+    font-weight:800;
+    box-shadow:
+        0 0 15px #00ffff,
+        inset 0 0 10px rgba(255,255,255,.6);
+    transition:.3s;
+}
+button:hover{
+    transform:scale(1.1);
+    box-shadow:0 0 35px #00ffff,0 0 60px #0066ff;
+}
+
+/* CARDS */
+.card{
+    background:rgba(0,0,0,.7);
+    padding:15px;
+    margin:10px;
+    border-radius:18px;
+    box-shadow:0 0 25px rgba(0,255,255,.5);
+}
 </style>
 </head>
+
 <body>
 
 <!-- PAGE 1 -->
-<div id="page1" class="container fade">
-<h1>Ayushman Gaming</h1>
-<h2>Enter Player Names</h2>
-<div id="playersContainer"></div>
-<button id="playGameBtn" class="hidden">Play the Game</button>
+<div id="page1" class="page">
+    <div class="big-title">WELCOME TO AAYUSHMAN GAMING</div>
+    <h2>Enter Player Names</h2>
+    <div id="players"></div>
+    <button id="startBtn" class="hidden">PLAY THE GAME</button>
 </div>
 
 <!-- PAGE 2 -->
-<div id="page2" class="container hidden fade">
-<h2 id="currentPlayerName"></h2>
-<button id="confidentialBtn">Confidential</button>
-<h3 id="resultDisplay"></h3>
-<button id="nextPlayerBtn" class="hidden">Next Player</button>
+<div id="page2" class="page hidden">
+    <h1 id="playerName"></h1>
+    <button id="secretBtn">CONFIDENTIAL</button>
+    <h2 id="secretText"></h2>
+    <button id="nextPlayerBtn" class="hidden">NEXT PLAYER</button>
 </div>
 
 <!-- PAGE 3 -->
-<div id="page3" class="container hidden fade">
-<h2 id="questionPlayerName"></h2>
-<div id="questionContainer">
-<p id="questionText"></p>
-<input type="text" id="answerInput" placeholder="Your answer">
-<button id="nextQuestionBtn">Next</button>
-</div>
+<div id="page3" class="page hidden">
+    <h1 id="questionPlayer"></h1>
+    <h2 id="questionText"></h2>
+    <input type="text" placeholder="Your Answer">
+    <button id="nextQuestion">NEXT</button>
 </div>
 
-<!-- PAGE 4: Voting -->
-<div id="page4" class="container hidden fade">
-<h1>Vote the Imposter</h1>
-<div id="votingContainer"></div>
-<button id="submitVoteBtn">Submit Votes</button>
+<!-- PAGE 4 -->
+<div id="page4" class="page hidden">
+    <h1>VOTE THE IMPOSTER</h1>
+    <div id="votes"></div>
+    <button id="submitVotes">GET RESULT</button>
 </div>
 
-<!-- PAGE 5: Voting Result -->
-<div id="page5" class="container hidden fade">
-<h1 id="votingResultText"></h1>
-<div id="finalResult" class="result-box"></div>
+<!-- PAGE 5 -->
+<div id="page5" class="page hidden">
+    <h1 id="finalText"></h1>
+    <div id="summary"></div>
 </div>
 
 <script>
-// ---------------- SETTINGS ----------------
 const characters=["ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO","RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND","PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"];
-let players=[],assignedCharacter="",imposter="",currentIndex=0,questionAnswers={},votes={},playerQuestions=[];
 
-// ---------------- PAGE 1 ----------------
-const playersContainer=document.getElementById('playersContainer');
-const playGameBtn=document.getElementById('playGameBtn');
-function addPlayerInput(){
-    const div=document.createElement('div');div.classList.add('player-box');
-    const input=document.createElement('input');input.type='text';
-    input.placeholder=`Player ${playersContainer.children.length+1} Name`;
-    input.addEventListener('input',()=>{
-        const inputs=Array.from(playersContainer.querySelectorAll('input'));
-        const lastInput=inputs[inputs.length-1];
-        if(lastInput.value.trim()!==""){addPlayerInput();}
-        togglePlayButton();
-    });
-    div.appendChild(input);playersContainer.appendChild(div);
+const questions=[
+"Relation to character",
+"Maximum age of character",
+"Does character wear jeans or not",
+"Does character have beard or not",
+"Is character present here or not",
+"How character is related to another character"
+];
+
+let players=[],imposter="",safeCharacter="";
+let index=0,votes={};
+
+const pages=[page1,page2,page3,page4,page5];
+
+function show(n){
+    pages.forEach(p=>p.classList.add("hidden"));
+    pages[n].classList.remove("hidden");
 }
-function togglePlayButton(){
-    const filled=Array.from(playersContainer.querySelectorAll('input')).filter(i=>i.value.trim()!=="");
-    playGameBtn.classList.toggle('hidden',filled.length<2);
+
+/* PLAYER INPUTS */
+const playersDiv=document.getElementById("players");
+function addInput(){
+    const i=document.createElement("input");
+    i.placeholder="Player Name";
+    i.oninput=()=>{
+        const inputs=[...playersDiv.querySelectorAll("input")];
+        if(inputs[inputs.length-1].value.trim()!=="") addInput();
+        document.getElementById("startBtn").classList.toggle(
+            "hidden",
+            inputs.filter(x=>x.value.trim()!=="").length<2
+        );
+    };
+    playersDiv.appendChild(i);
 }
-addPlayerInput();
-playGameBtn.addEventListener('click',()=>{
-    players=Array.from(playersContainer.querySelectorAll('input')).map(i=>i.value.trim()).filter(n=>n!=="");
-    assignImposterAndCharacter();showPage2();
-});
+addInput();
 
-// ---------------- PAGE 2 ----------------
-const page1=document.getElementById('page1');
-const page2=document.getElementById('page2');
-const currentPlayerName=document.getElementById('currentPlayerName');
-const confidentialBtn=document.getElementById('confidentialBtn');
-const resultDisplay=document.getElementById('resultDisplay');
-const nextPlayerBtn=document.getElementById('nextPlayerBtn');
-
-function assignImposterAndCharacter(){
+/* START */
+startBtn.onclick=()=>{
+    players=[...playersDiv.querySelectorAll("input")].map(i=>i.value.trim()).filter(Boolean);
     imposter=players[Math.floor(Math.random()*players.length)];
-    assignedCharacter=characters[Math.floor(Math.random()*characters.length)];
+    safeCharacter=characters[Math.floor(Math.random()*characters.length)];
+    index=0;
+    show(1);
+    loadPlayer();
+};
+
+/* CONFIDENTIAL */
+function loadPlayer(){
+    playerName.textContent=players[index];
+    secretText.textContent="";
+    secretBtn.style.display="inline-block";
+    nextPlayerBtn.classList.add("hidden");
 }
+secretBtn.onclick=()=>{
+    const p=players[index];
+    secretText.textContent=(p===imposter)?"IMPOSTER ❌":"SAFE ✅ : "+safeCharacter;
+    secretBtn.style.display="none";
+    nextPlayerBtn.classList.remove("hidden");
+};
+nextPlayerBtn.onclick=()=>{
+    index++;
+    if(index<players.length) loadPlayer();
+    else{
+        index=0;
+        show(2);
+        loadQuestion();
+    }
+};
 
-function showPage2(){page1.classList.add('hidden');page2.classList.remove('hidden');currentIndex=0;loadCurrentPlayer();}
-function loadCurrentPlayer(){
-    const player=players[currentIndex];currentPlayerName.textContent=player;
-    resultDisplay.textContent="";confidentialBtn.classList.remove('hidden');nextPlayerBtn.classList.add('hidden');
+/* QUESTIONS */
+function loadQuestion(){
+    questionPlayer.textContent=players[index];
+    questionText.textContent=questions[Math.floor(Math.random()*questions.length)];
 }
-confidentialBtn.addEventListener('click',()=>{
-    const player=players[currentIndex];
-    resultDisplay.textContent=player===imposter?"Imposter ❌":`Safe ✅ - Character: ${assignedCharacter}`;
-    confidentialBtn.classList.add('hidden');nextPlayerBtn.classList.remove('hidden');
-});
-nextPlayerBtn.addEventListener('click',()=>{
-    currentIndex++;
-    if(currentIndex<players.length){loadCurrentPlayer();}else{showPage3();}
-});
+nextQuestion.onclick=()=>{
+    index++;
+    if(index<players.length) loadQuestion();
+    else{
+        show(3);
+        loadVoting();
+    }
+};
 
-// ---------------- PAGE 3 ----------------
-const page3=document.getElementById('page3');
-const questionPlayerName=document.getElementById('questionPlayerName');
-const questionText=document.getElementById('questionText');
-const answerInput=document.getElementById('answerInput');
-const nextQuestionBtn=document.getElementById('nextQuestionBtn');
-
-const questionPool=["Relation to character","Maximum age of character","Number of child character have","Does character have beard?","Is character in DARING IDIOTS?","Does character wear jeans?","How character is related to another?","Is character present here?"];
-
-function selectQuestionForPlayer(maxAge){
-    let available=[...questionPool];
-    let q=available[Math.floor(Math.random()*available.length)];
-    if((q==="Number of child character have"||q==="Is character in DARING IDIOTS?")&&maxAge<=30){q="Relation to character";}
-    return q;
-}
-
-function showPage3(){page2.classList.add('hidden');page3.classList.remove('hidden');currentIndex=0;loadQuestionForPlayer();}
-
-function loadQuestionForPlayer(){
-    const player=players[currentIndex];questionPlayerName.textContent=player;
-    const maxAge=Math.floor(Math.random()*60)+10;
-    const q=selectQuestionForPlayer(maxAge);
-    playerQuestions[currentIndex]=q;questionText.textContent=q;answerInput.value="";
-}
-
-nextQuestionBtn.addEventListener('click',()=>{
-    const player=players[currentIndex];
-    if(!questionAnswers[player]) questionAnswers[player]=[];
-    questionAnswers[player].push(answerInput.value.trim());
-    currentIndex++;
-    if(currentIndex<players.length){loadQuestionForPlayer();}
-    else{showPage4();}
-});
-
-// ---------------- PAGE 4: Voting ----------------
-const page4=document.getElementById('page4');
-const votingContainer=document.getElementById('votingContainer');
-const submitVoteBtn=document.getElementById('submitVoteBtn');
-function showPage4(){
-    page3.classList.add('hidden');page4.classList.remove('hidden');votingContainer.innerHTML="";
-    players.forEach(p=>{
-        const div=document.createElement('div');
-        div.innerHTML=`<h3>${p}</h3><select id="vote_${p}">${players.map(pl=>`<option value="${pl}">${pl}</option>`).join('')}</select>`;
-        votingContainer.appendChild(div);
-    });
-}
-submitVoteBtn.addEventListener('click',()=>{
+/* VOTING */
+function loadVoting(){
     votes={};
+    votesDiv.innerHTML="";
     players.forEach(p=>{
-        const selected=document.getElementById(`vote_${p}`).value;
-        votes[selected]=(votes[selected]||0)+1;
+        const c=document.createElement("div");
+        c.className="card";
+        c.innerHTML=`<h3>${p}</h3>
+        <select id="v_${p}">
+            ${players.map(x=>`<option>${x}</option>`).join("")}
+        </select>`;
+        votesDiv.appendChild(c);
     });
-    showPage5();
-});
-
-// ---------------- PAGE 5: Voting Result ----------------
-const page5=document.getElementById('page5');
-const votingResultText=document.getElementById('votingResultText');
-const finalResult=document.getElementById('finalResult');
-
-function showPage5(){
-    page4.classList.add('hidden');page5.classList.remove('hidden');
-    const maxVotes=Math.max(...Object.values(votes));
-    const imposterVotes=votes[imposter]||0;
-    if(Object.values(votes).filter(v=>v===maxVotes).length>1){votingResultText.textContent="It's a Draw!";}
-    else if(imposterVotes===maxVotes){votingResultText.textContent="Imposter lost the game! You win!";}
-    else{votingResultText.textContent="Sorry, Imposter wins!";}
-    finalResult.innerHTML="";
+}
+submitVotes.onclick=()=>{
     players.forEach(p=>{
-        const div=document.createElement('div');div.classList.add('card');
-        div.innerHTML=`<h3>${p}</h3><p>${p===imposter?'Imposter ❌':'Safe ✅ - Character: '+assignedCharacter}</p>`;
-        finalResult.appendChild(div);
+        const v=document.getElementById("v_"+p).value;
+        votes[v]=(votes[v]||0)+1;
+    });
+    show(4);
+    showResult();
+};
+
+/* RESULT */
+function showResult(){
+    const max=Math.max(...Object.values(votes));
+    const impVotes=votes[imposter]||0;
+    if(impVotes===max && Object.values(votes).filter(v=>v===max).length===1)
+        finalText.textContent="IMPOSTER LOST – YOU WIN!";
+    else if(Object.values(votes).filter(v=>v===max).length>1)
+        finalText.textContent="IT'S A DRAW!";
+    else
+        finalText.textContent="SORRY – IMPOSTER WINS";
+
+    summary.innerHTML="";
+    players.forEach(p=>{
+        const d=document.createElement("div");
+        d.className="card";
+        d.innerHTML=`<h3>${p}</h3><p>${p===imposter?"IMPOSTER ❌":"SAFE ✅ "+safeCharacter}</p>`;
+        summary.appendChild(d);
     });
 }
 </script>
+
 </body>
 </html>
+
 
 
