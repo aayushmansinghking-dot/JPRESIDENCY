@@ -2,156 +2,123 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ayushman Gaming</title>
+<title>Ayushman Gaming Multiplayer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-/* ===== RESET ===== */
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
-/* ===== BACKGROUND IMAGE ===== */
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+
 body{
-    min-height:100vh;
-    background-image:url("bg.jpg");
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
-    background-attachment:fixed;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:#fff;
-    overflow:hidden;
+  min-height:100vh;
+  background-image:url("your-image.jpg");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#f0f0f0;
 }
 
-/* ===== ANIMATED OVERLAY ===== */
 body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    background:linear-gradient(120deg,rgba(0,0,0,.55),rgba(0,30,60,.55));
-    animation:bgMove 10s infinite alternate;
-    z-index:-1;
+  content:"";
+  position:fixed;
+  inset:0;
+  background:linear-gradient(120deg, rgba(0,0,0,.4), rgba(0,30,60,.4));
+  animation:bgMove 15s infinite alternate;
+  z-index:-1;
 }
 @keyframes bgMove{
-    from{filter:hue-rotate(0deg)}
-    to{filter:hue-rotate(40deg)}
+  0%{filter:hue-rotate(0deg)}
+  50%{filter:hue-rotate(30deg)}
+  100%{filter:hue-rotate(0deg)}
 }
 
-/* ===== COMMON ===== */
-.page{display:none;width:100%;max-width:900px;padding:25px}
-.active{display:block}
-
-.card{
-    background:rgba(0,0,0,.6);
-    border-radius:20px;
-    padding:25px;
-    box-shadow:0 0 25px rgba(0,255,255,.4);
-    margin-bottom:20px;
-}
-
-h1{
-    font-size:3.5em;
-    text-align:center;
-    margin-bottom:20px;
-    color:#00ffff;
-    text-shadow:0 0 20px #00ffff,0 0 40px #00ffff;
-}
-
-h2{text-align:center;margin-bottom:15px}
-
-.neon-btn{
-    background:#000;
-    color:#0ff;
-    border:2px solid #0ff;
-    padding:12px 25px;
-    font-size:1.1em;
-    border-radius:30px;
-    cursor:pointer;
-    box-shadow:0 0 15px #0ff;
-    transition:.3s;
-}
-.neon-btn:hover{
-    background:#0ff;
-    color:#000;
-    box-shadow:0 0 30px #0ff;
-}
-
-input,select{
-    width:100%;
-    padding:12px;
-    margin:8px 0;
-    border-radius:10px;
-    border:none;
-    font-size:1em;
-}
-
-.player-list div{
-    margin:8px 0;
-    display:flex;
-    gap:10px;
-}
+.page{display:none; width:100%; max-width:900px; padding:20px;}
+.active{display:block;}
+.card{background:rgba(0,0,0,.6); border-radius:18px; padding:25px; margin-bottom:20px; box-shadow:0 10px 25px rgba(0,0,0,.5);}
+h1{font-size:3em;text-align:center;margin-bottom:20px;color:#9feaff;}
+h2,h3{text-align:center;margin-bottom:15px;}
+.btn{background:rgba(20,80,120,.8); color:#fff; border:none; padding:12px 28px; border-radius:25px; font-size:1.05em; cursor:pointer; transition:.3s;}
+.btn:hover{background:rgba(40,120,180,.95); transform:translateY(-2px);}
+input,select{width:100%; padding:12px; margin:8px 0; border-radius:10px; border:none; font-size:1em;}
+.player-list div{margin-bottom:10px;}
 </style>
 </head>
 
 <body>
 
-<!-- PAGE 1 -->
+<!-- PAGE 1: Player Registration -->
 <div class="page active" id="page1">
-    <div class="card">
-        <h1>WELCOME TO<br>AAYUSHMAN GAMING</h1>
-        <h2>Enter Player Names</h2>
-        <div id="players" class="player-list"></div>
-        <button class="neon-btn" onclick="addPlayer()">+ Add Player</button>
-        <br><br>
-        <button class="neon-btn" onclick="startGame()">PLAY THE GAME</button>
-    </div>
+  <div class="card">
+    <h1>WELCOME TO<br>AAYUSHMAN GAMING</h1>
+    <h2>Enter Player Names</h2>
+    <div id="players" class="player-list"></div>
+    <button class="btn" onclick="addPlayer()">Add Player</button><br><br>
+    <button class="btn" onclick="startGame()">PLAY GAME</button>
+  </div>
 </div>
 
-<!-- PAGE 2 -->
+<!-- PAGE 2: Reveal Roles -->
 <div class="page" id="page2">
-    <div class="card">
-        <h2 id="currentPlayer"></h2>
-        <button class="neon-btn" onclick="revealRole()">CONFIDENTIAL</button>
-        <h2 id="roleText"></h2>
-        <button class="neon-btn" onclick="nextPlayer()">NEXT PLAYER</button>
-    </div>
+  <div class="card">
+    <h2 id="currentPlayer"></h2>
+    <button class="btn" onclick="revealRole()">CONFIDENTIAL</button>
+    <h3 id="roleText"></h3>
+    <button class="btn" onclick="nextPlayer()">NEXT PLAYER</button>
+  </div>
 </div>
 
-<!-- PAGE 3 QUESTIONS -->
+<!-- PAGE 3: Questions -->
 <div class="page" id="page3">
-    <div class="card">
-        <h2 id="questionPlayer"></h2>
-        <h3 id="questionText"></h3>
-        <button class="neon-btn" onclick="nextQuestion()">NEXT</button>
-    </div>
+  <div class="card">
+    <h2 id="questionPlayer"></h2>
+    <h3 id="questionText"></h3>
+    <button class="btn" onclick="nextQuestion()">NEXT</button>
+  </div>
 </div>
 
-<!-- PAGE 4 VOTING -->
+<!-- PAGE 4: Voting -->
 <div class="page" id="page4">
-    <div class="card">
-        <h2>VOTE THE IMPOSTER</h2>
-        <div id="voteArea"></div>
-        <button class="neon-btn" onclick="showResult()">GET RESULT</button>
-    </div>
+  <div class="card">
+    <h2>Vote the Imposter</h2>
+    <div id="voteArea"></div>
+    <button class="btn" onclick="showResult()">GET RESULT</button>
+  </div>
 </div>
 
-<!-- PAGE 5 RESULT -->
+<!-- PAGE 5: Final Result -->
 <div class="page" id="page5">
-    <div class="card">
-        <h1 id="resultText"></h1>
-        <div id="finalList"></div>
-    </div>
+  <div class="card">
+    <h1 id="resultText"></h1>
+    <div id="finalList"></div>
+  </div>
 </div>
 
 <script>
-/* ===== DATA ===== */
+// ====== Firebase Config ======
+const firebaseConfig = {
+  apiKey: "AIzaSyCf7NR56WKNGMMog24mFWM5uyPXsH8eTB8",
+  authDomain: "game-1cefd.firebaseapp.com",
+  projectId: "game-1cefd",
+  storageBucket: "game-1cefd.firebasestorage.app",
+  messagingSenderId: "715517953311",
+  appId: "1:715517953311:web:4ac079552ef762f3d79c2a",
+  measurementId: "G-LXT96Y905M"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ====== Game Data ======
 const characters=[
 "ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO",
 "RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND",
 "PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"
 ];
-
 const questions=[
 "Relation to character?",
 "Maximum age of character?",
@@ -160,100 +127,92 @@ const questions=[
 "Is character present here?"
 ];
 
-let players=[],roles=[],imposterIndex=0,current=0,questionIndex=0,votes={};
+// ====== Local State ======
+let players=[], roles=[], imposterIndex=0, current=0, questionIndex=0;
 
-/* ===== FUNCTIONS ===== */
+// ====== Page Functions ======
 function addPlayer(){
-    const div=document.createElement("div");
-    div.innerHTML=`<input placeholder="Player Name">`;
-    document.getElementById("players").appendChild(div);
+  const div=document.createElement("div");
+  div.innerHTML=`<input placeholder="Player Name">`;
+  document.getElementById("players").appendChild(div);
 }
-
 addPlayer();addPlayer();
 
 function startGame(){
-    players=[...document.querySelectorAll("#players input")].map(i=>i.value).filter(v=>v);
-    if(players.length<3) return alert("Minimum 3 players required");
-    imposterIndex=Math.floor(Math.random()*players.length);
-    const char=characters[Math.floor(Math.random()*characters.length)];
-    roles=players.map((_,i)=>i===imposterIndex?"IMPOSTER":"SAFE - "+char);
-    current=0;
-    showPage(2);
-    updatePlayer();
+  players=[...document.querySelectorAll("#players input")].map(i=>i.value).filter(v=>v);
+  if(players.length<3){alert("Minimum 3 players");return;}
+  imposterIndex=Math.floor(Math.random()*players.length);
+  const char=characters[Math.floor(Math.random()*characters.length)];
+  roles=players.map((_,i)=>i===imposterIndex?"IMPOSTER":"SAFE - "+char);
+
+  // Write initial data to Firebase
+  db.ref("/game").set({players: {}, imposter: imposterIndex, current:0, questionIndex:0});
+  players.forEach((p,i)=>{
+    db.ref(`/game/players/${i}`).set({name:p, role:roles[i], answered:false, vote:null});
+  });
+
+  current=0; showPage(2); updatePlayer();
 }
 
 function revealRole(){
-    document.getElementById("roleText").innerText=roles[current];
+  document.getElementById("roleText").innerText = roles[current];
 }
 
 function nextPlayer(){
-    current++;
-    if(current<players.length){
-        updatePlayer();
-    }else{
-        current=0;
-        showPage(3);
-        askQuestion();
-    }
+  current++;
+  if(current<players.length){updatePlayer();}
+  else{current=0; showPage(3); askQuestion();}
 }
 
 function updatePlayer(){
-    document.getElementById("currentPlayer").innerText=players[current];
-    document.getElementById("roleText").innerText="";
+  document.getElementById("currentPlayer").innerText = players[current];
+  document.getElementById("roleText").innerText = "";
 }
 
 function askQuestion(){
-    document.getElementById("questionPlayer").innerText=players[current];
-    document.getElementById("questionText").innerText=questions[questionIndex%questions.length];
+  document.getElementById("questionPlayer").innerText = players[current];
+  document.getElementById("questionText").innerText = questions[questionIndex%questions.length];
 }
 
 function nextQuestion(){
-    current++;
-    questionIndex++;
-    if(current<players.length){
-        askQuestion();
-    }else{
-        buildVoting();
-        showPage(4);
-    }
+  current++; questionIndex++;
+  if(current<players.length){askQuestion();}
+  else{buildVoting(); showPage(4);}
 }
 
 function buildVoting(){
-    const v=document.getElementById("voteArea");
-    v.innerHTML="";
-    players.forEach(p=>{
-        let s=`<select data-voter="${p}">`;
-        players.forEach(o=>s+=`<option>${o}</option>`);
-        s+=`</select>`;
-        v.innerHTML+=`<p>${p}</p>${s}<br>`;
-    });
+  const v = document.getElementById("voteArea");
+  v.innerHTML="";
+  players.forEach(p=>{
+    let s=`<select>`;
+    players.forEach(o=>s+=`<option>${o}</option>`);
+    s+=`</select>`;
+    v.innerHTML+=`<p>${p}</p>${s}<br>`;
+  });
 }
 
 function showResult(){
-    votes={};
-    document.querySelectorAll("select").forEach(s=>{
-        votes[s.value]=(votes[s.value]||0)+1;
-    });
-    const max=Math.max(...Object.values(votes));
-    const winners=Object.keys(votes).filter(k=>votes[k]===max);
-    let text="";
-    if(winners.includes(players[imposterIndex]) && winners.length===1)
-        text="IMPOSTER LOST — YOU WIN!";
-    else if(winners.length>1)
-        text="IT'S A DRAW!";
-    else
-        text="SORRY — IMPOSTER WINS!";
-    document.getElementById("resultText").innerText=text;
-    document.getElementById("finalList").innerHTML=players.map((p,i)=>`<p>${p} : ${roles[i]}</p>`).join("");
-    showPage(5);
+  let votes={};
+  document.querySelectorAll("select").forEach(s=>{
+    votes[s.value]=(votes[s.value]||0)+1;
+  });
+  const max=Math.max(...Object.values(votes));
+  const top=Object.keys(votes).filter(k=>votes[k]===max);
+  let msg="";
+  if(top.length===1 && top[0]===players[imposterIndex]) msg="IMPOSTER LOST — YOU WIN!";
+  else if(top.length>1) msg="IT'S A DRAW!";
+  else msg="SORRY — IMPOSTER WINS!";
+  document.getElementById("resultText").innerText=msg;
+  document.getElementById("finalList").innerHTML = players.map((p,i)=>`<p>${p} : ${roles[i]}</p>`).join("");
+  showPage(5);
 }
 
 function showPage(n){
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-    document.getElementById("page"+n).classList.add("active");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page"+n).classList.add("active");
 }
 </script>
-
 </body>
 </html>
+
 
