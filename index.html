@@ -2,19 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aayushman Gaming</title>
+<title>Ayushman Gaming</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap');
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Orbitron',sans-serif;
-}
-
+/* ===== BACKGROUND IMAGE ===== */
 body{
     min-height:100vh;
     background-image:url("your-image.jpg");
@@ -23,96 +18,78 @@ body{
     background-repeat:no-repeat;
     background-attachment:fixed;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
+    color:#fff;
+    overflow:hidden;
 }
 
+/* ===== ANIMATED OVERLAY ===== */
 body::before{
     content:"";
     position:fixed;
     inset:0;
-    background:linear-gradient(120deg,rgba(0,0,0,.6),rgba(0,20,40,.6));
+    background:linear-gradient(120deg,rgba(0,0,0,.55),rgba(0,30,60,.55));
+    animation:bgMove 10s infinite alternate;
     z-index:-1;
 }
-
-/* COMMON */
-.page{
-    width:90%;
-    max-width:950px;
-    padding:30px;
-    background:rgba(0,0,0,0.6);
-    border-radius:25px;
-    box-shadow:0 0 40px rgba(0,255,255,.4);
-    color:#fff;
-    text-align:center;
-    animation:fadeIn .8s ease;
-}
-.hidden{display:none;}
-
-@keyframes fadeIn{
-    from{opacity:0;transform:scale(.95);}
-    to{opacity:1;transform:scale(1);}
+@keyframes bgMove{
+    from{filter:hue-rotate(0deg)}
+    to{filter:hue-rotate(40deg)}
 }
 
-/* BIG TITLE */
-.big-title{
-    font-size:clamp(2.5rem,6vw,5rem);
-    color:#00ffff;
-    text-shadow:
-        0 0 10px #0ff,
-        0 0 30px #0ff,
-        0 0 60px #0ff;
-    margin-bottom:25px;
-    animation:glow 2s infinite alternate;
-}
+/* ===== COMMON ===== */
+.page{display:none;width:100%;max-width:900px;padding:25px}
+.active{display:block}
 
-@keyframes glow{
-    from{text-shadow:0 0 15px #0ff;}
-    to{text-shadow:0 0 40px #0ff,0 0 80px #00f;}
-}
-
-/* INPUTS */
-input, select{
-    width:80%;
-    max-width:400px;
-    padding:12px;
-    margin:10px auto;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
-    outline:none;
-    box-shadow:0 0 15px #00ffff;
-    text-align:center;
-}
-
-/* NEON BUTTONS */
-button{
-    padding:14px 35px;
-    margin:15px;
-    border:none;
+.card{
+    background:rgba(0,0,0,.6);
     border-radius:20px;
-    font-size:16px;
+    padding:25px;
+    box-shadow:0 0 25px rgba(0,255,255,.4);
+    margin-bottom:20px;
+}
+
+h1{
+    font-size:3.5em;
+    text-align:center;
+    margin-bottom:20px;
+    color:#00ffff;
+    text-shadow:0 0 20px #00ffff,0 0 40px #00ffff;
+}
+
+h2{text-align:center;margin-bottom:15px}
+
+.neon-btn{
+    background:#000;
+    color:#0ff;
+    border:2px solid #0ff;
+    padding:12px 25px;
+    font-size:1.1em;
+    border-radius:30px;
     cursor:pointer;
-    background:linear-gradient(135deg,#00ffff,#0066ff);
-    color:#000;
-    font-weight:800;
-    box-shadow:
-        0 0 15px #00ffff,
-        inset 0 0 10px rgba(255,255,255,.6);
+    box-shadow:0 0 15px #0ff;
     transition:.3s;
 }
-button:hover{
-    transform:scale(1.1);
-    box-shadow:0 0 35px #00ffff,0 0 60px #0066ff;
+.neon-btn:hover{
+    background:#0ff;
+    color:#000;
+    box-shadow:0 0 30px #0ff;
 }
 
-/* CARDS */
-.card{
-    background:rgba(0,0,0,.7);
-    padding:15px;
-    margin:10px;
-    border-radius:18px;
-    box-shadow:0 0 25px rgba(0,255,255,.5);
+input,select{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border-radius:10px;
+    border:none;
+    font-size:1em;
+}
+
+.player-list div{
+    margin:8px 0;
+    display:flex;
+    gap:10px;
 }
 </style>
 </head>
@@ -120,174 +97,162 @@ button:hover{
 <body>
 
 <!-- PAGE 1 -->
-<div id="page1" class="page">
-    <div class="big-title">WELCOME TO AAYUSHMAN GAMING</div>
-    <h2>Enter Player Names</h2>
-    <div id="players"></div>
-    <button id="startBtn" class="hidden">PLAY THE GAME</button>
+<div class="page active" id="page1">
+    <div class="card">
+        <h1>WELCOME TO<br>AAYUSHMAN GAMING</h1>
+        <h2>Enter Player Names</h2>
+        <div id="players" class="player-list"></div>
+        <button class="neon-btn" onclick="addPlayer()">+ Add Player</button>
+        <br><br>
+        <button class="neon-btn" onclick="startGame()">PLAY THE GAME</button>
+    </div>
 </div>
 
 <!-- PAGE 2 -->
-<div id="page2" class="page hidden">
-    <h1 id="playerName"></h1>
-    <button id="secretBtn">CONFIDENTIAL</button>
-    <h2 id="secretText"></h2>
-    <button id="nextPlayerBtn" class="hidden">NEXT PLAYER</button>
+<div class="page" id="page2">
+    <div class="card">
+        <h2 id="currentPlayer"></h2>
+        <button class="neon-btn" onclick="revealRole()">CONFIDENTIAL</button>
+        <h2 id="roleText"></h2>
+        <button class="neon-btn" onclick="nextPlayer()">NEXT PLAYER</button>
+    </div>
 </div>
 
-<!-- PAGE 3 -->
-<div id="page3" class="page hidden">
-    <h1 id="questionPlayer"></h1>
-    <h2 id="questionText"></h2>
-    <input type="text" placeholder="Your Answer">
-    <button id="nextQuestion">NEXT</button>
+<!-- PAGE 3 QUESTIONS -->
+<div class="page" id="page3">
+    <div class="card">
+        <h2 id="questionPlayer"></h2>
+        <h3 id="questionText"></h3>
+        <button class="neon-btn" onclick="nextQuestion()">NEXT</button>
+    </div>
 </div>
 
-<!-- PAGE 4 -->
-<div id="page4" class="page hidden">
-    <h1>VOTE THE IMPOSTER</h1>
-    <div id="votes"></div>
-    <button id="submitVotes">GET RESULT</button>
+<!-- PAGE 4 VOTING -->
+<div class="page" id="page4">
+    <div class="card">
+        <h2>VOTE THE IMPOSTER</h2>
+        <div id="voteArea"></div>
+        <button class="neon-btn" onclick="showResult()">GET RESULT</button>
+    </div>
 </div>
 
-<!-- PAGE 5 -->
-<div id="page5" class="page hidden">
-    <h1 id="finalText"></h1>
-    <div id="summary"></div>
+<!-- PAGE 5 RESULT -->
+<div class="page" id="page5">
+    <div class="card">
+        <h1 id="resultText"></h1>
+        <div id="finalList"></div>
+    </div>
 </div>
 
 <script>
-const characters=["ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO","RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND","PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"];
-
-const questions=[
-"Relation to character",
-"Maximum age of character",
-"Does character wear jeans or not",
-"Does character have beard or not",
-"Is character present here or not",
-"How character is related to another character"
+/* ===== DATA ===== */
+const characters=[
+"ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO",
+"RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND",
+"PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"
 ];
 
-let players=[],imposter="",safeCharacter="";
-let index=0,votes={};
+const questions=[
+"Relation to character?",
+"Maximum age of character?",
+"Does character wear jeans?",
+"Does character have beard?",
+"Is character present here?"
+];
 
-const pages=[page1,page2,page3,page4,page5];
+let players=[],roles=[],imposterIndex=0,current=0,questionIndex=0,votes={};
 
-function show(n){
-    pages.forEach(p=>p.classList.add("hidden"));
-    pages[n].classList.remove("hidden");
+/* ===== FUNCTIONS ===== */
+function addPlayer(){
+    const div=document.createElement("div");
+    div.innerHTML=`<input placeholder="Player Name">`;
+    document.getElementById("players").appendChild(div);
 }
 
-/* PLAYER INPUTS */
-const playersDiv=document.getElementById("players");
-function addInput(){
-    const i=document.createElement("input");
-    i.placeholder="Player Name";
-    i.oninput=()=>{
-        const inputs=[...playersDiv.querySelectorAll("input")];
-        if(inputs[inputs.length-1].value.trim()!=="") addInput();
-        document.getElementById("startBtn").classList.toggle(
-            "hidden",
-            inputs.filter(x=>x.value.trim()!=="").length<2
-        );
-    };
-    playersDiv.appendChild(i);
-}
-addInput();
+addPlayer();addPlayer();
 
-/* START */
-startBtn.onclick=()=>{
-    players=[...playersDiv.querySelectorAll("input")].map(i=>i.value.trim()).filter(Boolean);
-    imposter=players[Math.floor(Math.random()*players.length)];
-    safeCharacter=characters[Math.floor(Math.random()*characters.length)];
-    index=0;
-    show(1);
-    loadPlayer();
-};
-
-/* CONFIDENTIAL */
-function loadPlayer(){
-    playerName.textContent=players[index];
-    secretText.textContent="";
-    secretBtn.style.display="inline-block";
-    nextPlayerBtn.classList.add("hidden");
+function startGame(){
+    players=[...document.querySelectorAll("#players input")].map(i=>i.value).filter(v=>v);
+    if(players.length<3) return alert("Minimum 3 players required");
+    imposterIndex=Math.floor(Math.random()*players.length);
+    const char=characters[Math.floor(Math.random()*characters.length)];
+    roles=players.map((_,i)=>i===imposterIndex?"IMPOSTER":"SAFE - "+char);
+    current=0;
+    showPage(2);
+    updatePlayer();
 }
-secretBtn.onclick=()=>{
-    const p=players[index];
-    secretText.textContent=(p===imposter)?"IMPOSTER ❌":"SAFE ✅ : "+safeCharacter;
-    secretBtn.style.display="none";
-    nextPlayerBtn.classList.remove("hidden");
-};
-nextPlayerBtn.onclick=()=>{
-    index++;
-    if(index<players.length) loadPlayer();
-    else{
-        index=0;
-        show(2);
-        loadQuestion();
+
+function revealRole(){
+    document.getElementById("roleText").innerText=roles[current];
+}
+
+function nextPlayer(){
+    current++;
+    if(current<players.length){
+        updatePlayer();
+    }else{
+        current=0;
+        showPage(3);
+        askQuestion();
     }
-};
-
-/* QUESTIONS */
-function loadQuestion(){
-    questionPlayer.textContent=players[index];
-    questionText.textContent=questions[Math.floor(Math.random()*questions.length)];
 }
-nextQuestion.onclick=()=>{
-    index++;
-    if(index<players.length) loadQuestion();
-    else{
-        show(3);
-        loadVoting();
-    }
-};
 
-/* VOTING */
-function loadVoting(){
-    votes={};
-    votesDiv.innerHTML="";
+function updatePlayer(){
+    document.getElementById("currentPlayer").innerText=players[current];
+    document.getElementById("roleText").innerText="";
+}
+
+function askQuestion(){
+    document.getElementById("questionPlayer").innerText=players[current];
+    document.getElementById("questionText").innerText=questions[questionIndex%questions.length];
+}
+
+function nextQuestion(){
+    current++;
+    questionIndex++;
+    if(current<players.length){
+        askQuestion();
+    }else{
+        buildVoting();
+        showPage(4);
+    }
+}
+
+function buildVoting(){
+    const v=document.getElementById("voteArea");
+    v.innerHTML="";
     players.forEach(p=>{
-        const c=document.createElement("div");
-        c.className="card";
-        c.innerHTML=`<h3>${p}</h3>
-        <select id="v_${p}">
-            ${players.map(x=>`<option>${x}</option>`).join("")}
-        </select>`;
-        votesDiv.appendChild(c);
+        let s=`<select data-voter="${p}">`;
+        players.forEach(o=>s+=`<option>${o}</option>`);
+        s+=`</select>`;
+        v.innerHTML+=`<p>${p}</p>${s}<br>`;
     });
 }
-submitVotes.onclick=()=>{
-    players.forEach(p=>{
-        const v=document.getElementById("v_"+p).value;
-        votes[v]=(votes[v]||0)+1;
-    });
-    show(4);
-    showResult();
-};
 
-/* RESULT */
 function showResult(){
-    const max=Math.max(...Object.values(votes));
-    const impVotes=votes[imposter]||0;
-    if(impVotes===max && Object.values(votes).filter(v=>v===max).length===1)
-        finalText.textContent="IMPOSTER LOST – YOU WIN!";
-    else if(Object.values(votes).filter(v=>v===max).length>1)
-        finalText.textContent="IT'S A DRAW!";
-    else
-        finalText.textContent="SORRY – IMPOSTER WINS";
-
-    summary.innerHTML="";
-    players.forEach(p=>{
-        const d=document.createElement("div");
-        d.className="card";
-        d.innerHTML=`<h3>${p}</h3><p>${p===imposter?"IMPOSTER ❌":"SAFE ✅ "+safeCharacter}</p>`;
-        summary.appendChild(d);
+    votes={};
+    document.querySelectorAll("select").forEach(s=>{
+        votes[s.value]=(votes[s.value]||0)+1;
     });
+    const max=Math.max(...Object.values(votes));
+    const winners=Object.keys(votes).filter(k=>votes[k]===max);
+    let text="";
+    if(winners.includes(players[imposterIndex]) && winners.length===1)
+        text="IMPOSTER LOST — YOU WIN!";
+    else if(winners.length>1)
+        text="IT'S A DRAW!";
+    else
+        text="SORRY — IMPOSTER WINS!";
+    document.getElementById("resultText").innerText=text;
+    document.getElementById("finalList").innerHTML=players.map((p,i)=>`<p>${p} : ${roles[i]}</p>`).join("");
+    showPage(5);
+}
+
+function showPage(n){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.getElementById("page"+n).classList.add("active");
 }
 </script>
 
 </body>
 </html>
-
-
-
