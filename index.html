@@ -11,7 +11,6 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-
 body{
   min-height:100vh;
   background-image:url("your-image.jpg");
@@ -23,7 +22,6 @@ body{
   align-items:center;
   color:#f0f0f0;
 }
-
 body::before{
   content:"";
   position:fixed;
@@ -46,7 +44,6 @@ h2,h3{text-align:center;margin-bottom:15px;}
 .btn{background:rgba(20,80,120,.8); color:#fff; border:none; padding:12px 28px; border-radius:25px; font-size:1.05em; cursor:pointer; transition:.3s;}
 .btn:hover{background:rgba(40,120,180,.95); transform:translateY(-2px);}
 input,select{width:100%; padding:12px; margin:8px 0; border-radius:10px; border:none; font-size:1em;}
-.player-list div{margin-bottom:10px;}
 </style>
 </head>
 
@@ -56,29 +53,29 @@ input,select{width:100%; padding:12px; margin:8px 0; border-radius:10px; border:
 <div class="page active" id="page1">
   <div class="card">
     <h1>WELCOME TO<br>AAYUSHMAN GAMING</h1>
-    <h2>Enter Player Names</h2>
-    <div id="players" class="player-list"></div>
-    <button class="btn" onclick="addPlayer()">Add Player</button><br><br>
-    <button class="btn" onclick="startGame()">PLAY GAME</button>
+    <h2>Enter Your Name</h2>
+    <input id="playerName" placeholder="Your Name">
+    <button class="btn" onclick="registerPlayer()">Register</button>
+    <h3 id="registeredStatus"></h3>
+    <button class="btn" onclick="startGame()">Start Game (Admin)</button>
   </div>
 </div>
 
-<!-- PAGE 2: Reveal Roles -->
+<!-- PAGE 2: Role Reveal -->
 <div class="page" id="page2">
   <div class="card">
-    <h2 id="currentPlayer"></h2>
-    <button class="btn" onclick="revealRole()">CONFIDENTIAL</button>
+    <h2 id="roleTitle">Your Role</h2>
     <h3 id="roleText"></h3>
-    <button class="btn" onclick="nextPlayer()">NEXT PLAYER</button>
+    <button class="btn" onclick="nextPhase()">Next</button>
   </div>
 </div>
 
 <!-- PAGE 3: Questions -->
 <div class="page" id="page3">
   <div class="card">
-    <h2 id="questionPlayer"></h2>
+    <h2 id="questionTitle"></h2>
     <h3 id="questionText"></h3>
-    <button class="btn" onclick="nextQuestion()">NEXT</button>
+    <button class="btn" onclick="nextQuestion()">Next Question</button>
   </div>
 </div>
 
@@ -86,12 +83,12 @@ input,select{width:100%; padding:12px; margin:8px 0; border-radius:10px; border:
 <div class="page" id="page4">
   <div class="card">
     <h2>Vote the Imposter</h2>
-    <div id="voteArea"></div>
-    <button class="btn" onclick="showResult()">GET RESULT</button>
+    <select id="voteSelect"></select>
+    <button class="btn" onclick="submitVote()">Submit Vote</button>
   </div>
 </div>
 
-<!-- PAGE 5: Final Result -->
+<!-- PAGE 5: Result -->
 <div class="page" id="page5">
   <div class="card">
     <h1 id="resultText"></h1>
@@ -114,105 +111,131 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ====== Game Data ======
-const characters=[
-"ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO",
-"RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND",
-"PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"
-];
-const questions=[
-"Relation to character?",
-"Maximum age of character?",
-"Does character wear jeans?",
-"Does character have beard?",
-"Is character present here?"
-];
+const characters=["ANSH","SRISHTI","KHUSHI","ISHU","AARUSH","KUNDAN","AVISHA","DABLOO","RUDRA","DAKSH","PRIYAM","SIDDHI","GOPAL","PAKO","CHUNNU","NAND","PRATAP","SUNITA","BABY","PUNAM","DOLLY","SUDHA","TUNNI"];
+const questions=["Relation to character?","Maximum age of character?","Does character wear jeans?","Does character have beard?","Is character present here?"];
 
 // ====== Local State ======
-let players=[], roles=[], imposterIndex=0, current=0, questionIndex=0;
+let playerID=null;
+let role="";
+let questionIndex=0;
 
-// ====== Page Functions ======
-function addPlayer(){
-  const div=document.createElement("div");
-  div.innerHTML=`<input placeholder="Player Name">`;
-  document.getElementById("players").appendChild(div);
-}
-addPlayer();addPlayer();
-
-function startGame(){
-  players=[...document.querySelectorAll("#players input")].map(i=>i.value).filter(v=>v);
-  if(players.length<3){alert("Minimum 3 players");return;}
-  imposterIndex=Math.floor(Math.random()*players.length);
-  const char=characters[Math.floor(Math.random()*characters.length)];
-  roles=players.map((_,i)=>i===imposterIndex?"IMPOSTER":"SAFE - "+char);
-
-  // Write initial data to Firebase
-  db.ref("/game").set({players: {}, imposter: imposterIndex, current:0, questionIndex:0});
-  players.forEach((p,i)=>{
-    db.ref(`/game/players/${i}`).set({name:p, role:roles[i], answered:false, vote:null});
-  });
-
-  current=0; showPage(2); updatePlayer();
-}
-
-function revealRole(){
-  document.getElementById("roleText").innerText = roles[current];
-}
-
-function nextPlayer(){
-  current++;
-  if(current<players.length){updatePlayer();}
-  else{current=0; showPage(3); askQuestion();}
-}
-
-function updatePlayer(){
-  document.getElementById("currentPlayer").innerText = players[current];
-  document.getElementById("roleText").innerText = "";
-}
-
-function askQuestion(){
-  document.getElementById("questionPlayer").innerText = players[current];
-  document.getElementById("questionText").innerText = questions[questionIndex%questions.length];
-}
-
-function nextQuestion(){
-  current++; questionIndex++;
-  if(current<players.length){askQuestion();}
-  else{buildVoting(); showPage(4);}
-}
-
-function buildVoting(){
-  const v = document.getElementById("voteArea");
-  v.innerHTML="";
-  players.forEach(p=>{
-    let s=`<select>`;
-    players.forEach(o=>s+=`<option>${o}</option>`);
-    s+=`</select>`;
-    v.innerHTML+=`<p>${p}</p>${s}<br>`;
-  });
-}
-
-function showResult(){
-  let votes={};
-  document.querySelectorAll("select").forEach(s=>{
-    votes[s.value]=(votes[s.value]||0)+1;
-  });
-  const max=Math.max(...Object.values(votes));
-  const top=Object.keys(votes).filter(k=>votes[k]===max);
-  let msg="";
-  if(top.length===1 && top[0]===players[imposterIndex]) msg="IMPOSTER LOST — YOU WIN!";
-  else if(top.length>1) msg="IT'S A DRAW!";
-  else msg="SORRY — IMPOSTER WINS!";
-  document.getElementById("resultText").innerText=msg;
-  document.getElementById("finalList").innerHTML = players.map((p,i)=>`<p>${p} : ${roles[i]}</p>`).join("");
-  showPage(5);
-}
-
+// ====== Functions ======
 function showPage(n){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById("page"+n).classList.add("active");
 }
+
+// ----- Register Player -----
+function registerPlayer(){
+  const name=document.getElementById("playerName").value.trim();
+  if(!name){alert("Enter your name"); return;}
+  // Push player to Firebase
+  playerID=db.ref("/game/players").push().key;
+  db.ref("/game/players/"+playerID).set({name:name, role:null, answered:false, vote:null});
+  document.getElementById("registeredStatus").innerText="Registered successfully!";
+}
+
+// ----- Start Game (Admin) -----
+function startGame(){
+  db.ref("/game/players").once("value", snap=>{
+    const data = snap.val();
+    if(!data || Object.keys(data).length<3){alert("At least 3 players required"); return;}
+    const playerIDs=Object.keys(data);
+    const imposterIndex=Math.floor(Math.random()*playerIDs.length);
+    const char=characters[Math.floor(Math.random()*characters.length)];
+    // Assign roles
+    playerIDs.forEach((id,i)=>{
+      const roleText = (i===imposterIndex)?"IMPOSTER":"SAFE - "+char;
+      db.ref("/game/players/"+id+"/role").set(roleText);
+    });
+    // Set first phase
+    db.ref("/game/state").set({phase:"roleReveal"});
+  });
+}
+
+// ----- Listen to Game State -----
+db.ref("/game/state").on("value", snap=>{
+  const state = snap.val();
+  if(!state) return;
+  if(state.phase==="roleReveal"){showPage(2); getRole();}
+  else if(state.phase==="questions"){showPage(3); showQuestion();}
+  else if(state.phase==="voting"){showPage(4); buildVoting();}
+  else if(state.phase==="result"){showPage(5); showResult();}
+});
+
+// ----- Get Role for this Player -----
+function getRole(){
+  db.ref("/game/players/"+playerID+"/role").once("value").then(snap=>{
+    role=snap.val();
+    document.getElementById("roleText").innerText=role;
+  });
+}
+
+// ----- Next Phase from Role Reveal -----
+function nextPhase(){
+  db.ref("/game/state").set({phase:"questions", currentQuestion:0});
+}
+
+// ----- Questions -----
+function showQuestion(){
+  document.getElementById("questionTitle").innerText="Your Question";
+  const qIndex=Math.floor(Math.random()*questions.length);
+  document.getElementById("questionText").innerText=questions[qIndex];
+}
+
+function nextQuestion(){
+  // Move to voting after questions
+  db.ref("/game/state").set({phase:"voting"});
+}
+
+// ----- Voting -----
+function buildVoting(){
+  db.ref("/game/players").once("value").then(snap=>{
+    const data = snap.val();
+    const sel = document.getElementById("voteSelect");
+    sel.innerHTML="";
+    Object.values(data).forEach(p=>{
+      sel.innerHTML+=`<option>${p.name}</option>`;
+    });
+  });
+}
+
+function submitVote(){
+  const voted = document.getElementById("voteSelect").value;
+  db.ref("/game/players/"+playerID+"/vote").set(voted).then(()=>{
+    alert("Vote submitted!");
+    // Check if all votes in
+    db.ref("/game/players").once("value").then(snap=>{
+      const playersData = snap.val();
+      const allVoted = Object.values(playersData).every(p=>p.vote);
+      if(allVoted) db.ref("/game/state").set({phase:"result"});
+    });
+  });
+}
+
+// ----- Show Result -----
+function showResult(){
+  db.ref("/game/players").once("value").then(snap=>{
+    const data = snap.val();
+    const votesCount={};
+    const playersArray=Object.values(data);
+    playersArray.forEach(p=>{
+      if(p.vote) votesCount[p.vote]=(votesCount[p.vote]||0)+1;
+    });
+    // Find max votes
+    const maxVote=Math.max(...Object.values(votesCount));
+    const topVoted=Object.keys(votesCount).filter(k=>votesCount[k]===maxVote);
+    // Who is imposter
+    const imposter = playersArray.find(p=>p.role==="IMPOSTER").name;
+    let msg="";
+    if(topVoted.length===1 && topVoted[0]===imposter) msg="IMPOSTER LOST — YOU WIN!";
+    else if(topVoted.length>1) msg="IT'S A DRAW!";
+    else msg="SORRY — IMPOSTER WINS!";
+    document.getElementById("resultText").innerText=msg;
+    document.getElementById("finalList").innerHTML=playersArray.map(p=>`<p>${p.name} : ${p.role}</p>`).join("");
+  });
+}
 </script>
+
 </body>
 </html>
-
-
